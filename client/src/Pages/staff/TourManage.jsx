@@ -1,0 +1,184 @@
+import React, { useState, useEffect } from "react";
+import StaffSideBar from "../../Components/staff/StaffSideBar";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import instance from "../../api";
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+
+const initialValues = {
+  customerID: "",
+  guideID: "",
+  price: "",
+  startDate: "",
+  endDate: "",
+  adultsCount: "",
+  childrenCount: "",
+  description: "",
+  specialNotes: "",
+  totalDistance: "",
+};
+
+const validationSchema = Yup.object().shape({
+  customerID: Yup.number().required("Customer ID is required"),
+  guideID: Yup.number().required("Guide ID is required"),
+  price: Yup.number().required("Price is required"),
+  startDate: Yup.date().required("Start date is required"),
+  endDate: Yup.date().required("End date is required"),
+  adultsCount: Yup.number().required("Number of adults is required"),
+  childrenCount: Yup.number().required("Number of children is required"),
+  description: Yup.string().required("Description is required"),
+  specialNotes: Yup.string().required("Special notes are required"),
+  totalDistance: Yup.number().required("Total distance is required"),
+});
+
+const TourManage = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [tours, setTours] = useState([]);
+  const [inputData, setInputData] = useState("");
+  const [inputData1, setInputData1] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedGuide, setSelectedGuide] = useState(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await instance.get("/user");
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    const fetchTours = async () => {
+      try {
+        const response = await instance.get("/trip");
+        setTours(response.data);
+      } catch (error) {
+        console.error("Error fetching tours:", error);
+      }
+    };
+
+    fetchTours();
+  }, []);
+
+  const handleSearch = (e) => {
+    setInputData(e.target.value);
+    setSelectedUser(users.filter(user => user.UserID === parseInt(e.target.value, 10) && (user.Role.toLowerCase() === 'customer')));
+  };
+
+  const handleGuideSearch = (e)=> {
+    setInputData1(e.target.value);
+    setSelectedGuide(users.filter(user => (user.FirstName == e.target.value || user.LastName == e.target.value)  && user.Role.toLowerCase() === 'guide'));
+  }
+
+  const handleSubmit = async (values, { setSubmitting }) => {
+    const { customerID, guideID, price, startDate, endDate, adultsCount, childrenCount, description, specialNotes, totalDistance } = values;
+  
+    try {
+      await instance.post("/trip/addTrip", {
+        CustomerID: customerID,
+        GuideID: guideID,
+        Price: price,
+        StartDate: startDate,
+        EndDate: endDate,
+        AdultsCount: adultsCount,
+        ChildrenCount: childrenCount,
+        Description: description,
+        SpecialNotes: specialNotes,
+        TotalDistance: totalDistance
+      });
+      
+      toast.success("Tour created successfully");
+      setSubmitting(false);
+      setShowModal(false);
+    } catch (error) {
+      toast.error("Failed to create tour");
+      console.error("Error creating tour:", error.message);
+      setSubmitting(false);
+    }
+  };
+  
+  return (
+    <>
+      <ToastContainer />
+      <div className="flex flex-row">
+        <StaffSideBar />
+        <div className="w-full p-4">
+          <button className="btn" onClick={() => setShowModal(true)}>Create Tour</button>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting }) => (
+              <Form>
+                {/* Modal for creating tour */}
+                <div className={`modal ${showModal ? 'modal-open' : ''}`}>
+                  <div className="modal-box">
+                    <h1 className="text-2xl font-bold mb-4">Create Tour</h1>
+                    {/* Form fields */}
+                    <div className="mb-4">
+                      <label htmlFor="customerID" className="block text-sm font-medium text-gray-700">Select Customer:</label>
+                      {/* Input for searching customer */}
+                      <input type="text" name="selectCustomerID" value={inputData} onChange={handleSearch} className="mt-1 p-2 w-full border bg-white border-gray-300 rounded-md" />
+                      {/* Dropdown for selecting customer */}
+                      <Field as="select" name="customerID" className="mt-1 p-2 w-full border border-gray-300 bg-white rounded-md">
+                        <option value="">Select Customer</option>
+                        {selectedUser && selectedUser.map(user => (
+                          <option key={user.UserID} value={user.UserID}>{user.FirstName}</option>
+                        ))}
+                      </Field>
+                      <ErrorMessage name="customerID" component="div" className="text-red-500 text-sm" />
+                    </div>
+                    {/* Similar structure for selecting guide and other form fields */}
+                    {/* Submit and cancel buttons */}
+                    <div className="modal-action">
+                      <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+                        {isSubmitting ? "Submitting..." : "Submit"}
+                      </button>
+                      <button className="btn btn-danger" onClick={() => setShowModal(false)}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Form>
+            )}
+          </Formik>
+          {/* Component to display tours */}
+          <TourList tours={tours} />
+        </div>
+      </div>
+    </>
+  );
+};
+
+// Component to display tours
+const TourList = ({ tours }) => {
+    return (
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Tours</h2>
+        <ul>
+          {tours != null && tours.map(tour => (
+            <li key={tour.TripID} className="mb-4 p-4 border rounded-md">
+              <p className="font-semibold">Customer ID: {tour.CustomerID}</p>
+              <p className="font-semibold">Guide ID: {tour.GuideID}</p>
+              <p className="font-semibold">Price: ${tour.Price}</p>
+              <p className="font-semibold">Start Date : {tour.StartDate.split('T')[0]}</p>
+              <p className="font-semibold">End Date : {tour.EndDate.split('T')[0]}</p>
+              <p className="font-semibold">Description : {tour.Description}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+  
+
+export default TourManage;
