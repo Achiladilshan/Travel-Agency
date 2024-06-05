@@ -16,6 +16,7 @@ import UserManagement from './Pages/admin/UserManagement';
 import FeedbackPage from './Pages/admin/FeedbackPage';
 import GuideDashboard from './Pages/guide/GuideDashboard';
 import HotelManagement from './Pages/admin/HotelManagement';
+import PaymentManagement from './Pages/admin/PaymentManagement';
 import TourPackage from './Pages/admin/TourPackage';
 import ProtectedAdminRoute from './Routes/ProtectedAdminRoute';
 import ProtectedGuideRoute from './Routes/ProtectedGuideRoute';
@@ -23,6 +24,11 @@ import ProtectedCustomertRoute from './Routes/ProtectedCustomerRoute';
 import ProtectedStaffRoute from './Routes/ProtectedStaffRoute';
 import TourManage from './Pages/staff/TourManage';
 import ViewTours from './Components/guide/ViewTours';
+import Guidecurrent from './Pages/guide/CurrentTrips';
+import Guideprevious from './Pages/guide/PreviousTrips';
+import Guidepayment from './Pages/guide/Payment';
+import Guidechat from './Pages/guide/Chat';
+
 
 function App() {
   return (
@@ -45,13 +51,17 @@ function App() {
           <Route path='/admin/user' element={<UserManagement/>}/>
           <Route path='/admin/feedback' element={<FeedbackPage/>}/>
           <Route path='/admin/hotel' element={<HotelManagement/>}/>
-          <Route path='/admin/payment' element={<HotelManagement/>}/>
+          <Route path='/admin/payment' element={<PaymentManagement/>}/>
           <Route path='/admin/tourpackage' element={<TourPackage/>}/>
         </Route>
         
         <Route element={<ProtectedGuideRoute/>}>
         <Route path='/guide-dashboard' element={<GuideDashboard/>}/>
-        <Route path='/guide-dashboard/tours' element={<ViewTours/>}/>
+        <Route path='/guide/tours' element={<ViewTours/>}/>
+        <Route path='/guide/currenttrips' element={<Guidecurrent/>}/>
+        <Route path='/guide/previoustrips' element={<Guideprevious/>}/>
+        <Route path='/guide/chat' element={<Guidechat/>}/>
+        <Route path='/guide/payment' element={<Guidepayment/>}/>
         </Route>
 
         <Route element={<ProtectedStaffRoute/>}>

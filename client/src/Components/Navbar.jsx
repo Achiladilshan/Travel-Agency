@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import LogoImage from '../Assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
+
 
 const Navbar = ({activeItem, buttonState, buttonLoc }) => {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ const Navbar = ({activeItem, buttonState, buttonLoc }) => {
   const handleClick = () => {
     navigate(buttonLoc);
   };
+
 
   return (
     <div>

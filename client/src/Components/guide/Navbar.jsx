@@ -3,12 +3,11 @@ import Logout from '../../Assets/icons/logout.png';
 import Profile from '../../Assets/icons/profile.png';
 import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import PersonIcon from '@mui/icons-material/Person';
-import ModeOfTravelIcon from '@mui/icons-material/ModeOfTravel';
 import PaidIcon from '@mui/icons-material/Paid';
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import RateReviewIcon from '@mui/icons-material/RateReview';
 import { jwtDecode } from 'jwt-decode';
+import LoopIcon from '@mui/icons-material/Loop';
+import HistoryIcon from '@mui/icons-material/History';
+import ChatIcon from '@mui/icons-material/Chat';
 
 const Navbar = ({ activeItem }) => {
   const [activeLink, setActiveLink] = useState(localStorage.getItem('activeLink') || activeItem);
@@ -23,7 +22,7 @@ const Navbar = ({ activeItem }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("activeLink");
     }
-    const targetLink = link === 'logout' ? 'login' : link === 'dashboard' ? 'admin-dashboard' : `admin/${link}`;
+    const targetLink = link === 'logout' ? 'login' : link === 'dashboard' ? 'guide-dashboard' : `guide/${link}`;
     navigate(targetLink === 'login' ? '/login' : `/${targetLink}`);
   };
 
@@ -70,24 +69,24 @@ const Navbar = ({ activeItem }) => {
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "user" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('user')} className='flex items-center w-full'>
-            <div className='p-3'><PersonIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>User Management</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "currenttrips" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('currenttrips')} className='flex items-center w-full'>
+            <div className='p-3'><LoopIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Curent Trips</h1>
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "tourpackage" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('tourpackage')} className='flex items-center w-full'>
-            <div className='p-3'><ModeOfTravelIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Tour Package</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "previoustrips" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('previoustrips')} className='flex items-center w-full'>
+            <div className='p-3'><HistoryIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Previous Trips</h1>
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "hotel" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('hotel')} className='flex items-center w-full'>
-            <div className='p-3'><HomeWorkIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Hotels</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "chat" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('chat')} className='flex items-center w-full'>
+            <div className='p-3'><ChatIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Chat</h1>
             </button>
           </div>
 
@@ -95,13 +94,6 @@ const Navbar = ({ activeItem }) => {
             <button onClick={handleLinkClick('payment')} className='flex items-center w-full'>
             <div className='p-3'><PaidIcon /></div>
               <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Payment</h1>
-            </button>
-          </div>
-
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "feedback" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('feedback')} className='flex items-center w-full'>
-            <div className='p-3'><RateReviewIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Feedback</h1>
             </button>
           </div>
         </div>

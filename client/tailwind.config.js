@@ -30,7 +30,7 @@ module.exports = {
       {
         light: {
           "primary": "#570df8",
-          "secondary": "#f000b8",
+          "secondary": "#c79500",
           "accent": "#37cdbe",
           "neutral": "#3d4451",
           "base-100": "#ffffff",
@@ -38,6 +38,7 @@ module.exports = {
           "success": "#36d399",
           "warning": "#fbbd23",
           "error": "#f87272",
+          "cancel": "#730000",
         },
       },
     ],

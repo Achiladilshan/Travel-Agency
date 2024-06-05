@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminSideBar from '../../Components/admin/AdminSideBar';
+import AdminNavBar from '../../Components/admin/Navbar';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'daisyui/dist/full.css'; // Ensure DaisyUI is properly imported
@@ -52,7 +52,53 @@ const HotelManagement = () => {
         setShowDeleteModal(true);
     };
 
+    const validateHotel = (hotel) => {
+        let errors = {};
+
+        if (!hotel.Name) {
+            errors.name = "Name is required";
+        }
+
+        if (!hotel.HotType) {
+            errors.hotType = "Type is required";
+        }
+
+        if (!hotel.PhoneNumber) {
+            errors.phoneNumber = "Phone Number is required";
+        } else if (!/^07\d{8}$/.test(hotel.PhoneNumber)) {
+            errors.phoneNumber = "Invalid phone number format";
+        }
+
+        if (!hotel.HotDesc) {
+            errors.hotDesc = "Description is required";
+        }
+
+        if (!hotel.Packages) {
+            errors.packages = "Packages is required";
+        }
+
+        if (!hotel.Address) {
+            errors.address = "Address is required";
+        }
+
+        if (!hotel.Email) {
+            errors.email = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(hotel.Email)) {
+            errors.email = "Invalid email address";
+        }
+
+        return errors;
+    };
+
+
     const handleAddHotel = async () => {
+        const errors = validateHotel(selectedHotel);
+        if (Object.keys(errors).length > 0) {
+            // Display error messages
+            Object.values(errors).forEach(error => toast.error(error));
+            return;
+        }
+
         try {
             await instance.post('/hotel/addHotel', selectedHotel);
             toast.success('Hotel added successfully');
@@ -65,6 +111,13 @@ const HotelManagement = () => {
     };
 
     const handleUpdateHotel = async () => {
+        const errors = validateHotel(selectedHotel);
+        if (Object.keys(errors).length > 0) {
+            // Display error messages
+            Object.values(errors).forEach(error => toast.error(error));
+            return;
+        }
+
         try {
             await instance.put(`/hotel/updateHotel/${selectedHotel.HotelID}`, selectedHotel);
             toast.success('Hotel updated successfully');
@@ -74,6 +127,8 @@ const HotelManagement = () => {
             toast.error('Failed to update hotel');
         }
     };
+
+
 
     const handleDeleteHotel = async () => {
         try {
@@ -99,44 +154,51 @@ const HotelManagement = () => {
         <>
             <ToastContainer />
             <div className='flex flex-row'>
-                <AdminSideBar />
-                <div className='bg-white w-full p-4'>
-                    <h1 className='text-2xl font-bold mb-4'>Hotel Management</h1>
-                    <button className="btn btn-primary mb-4" onClick={handleAddClick}>Add Hotel</button>
-                    <div className="overflow-x-auto">
-                        <table className="table w-full">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Type</th>
-                                    <th>Phone Number</th>
-                                    <th>Description</th>
-                                    <th>Packages</th>
-                                    <th>Address</th>
-                                    <th>Email</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {hotels.map(hotel => (
-                                    <tr key={hotel.HotelID}>
-                                        <td>{hotel.HotelID}</td>
-                                        <td>{hotel.Name}</td>
-                                        <td>{hotel.HotType}</td>
-                                        <td>{hotel.PhoneNumber}</td>
-                                        <td>{hotel.HotDesc}</td>
-                                        <td>{hotel.Packages}</td>
-                                        <td>{hotel.Address}</td>
-                                        <td>{hotel.Email}</td>
-                                        <td>
-                                            <button className="btn btn-primary mr-2" onClick={() => handleUpdateClick(hotel)}>Update</button>
-                                            <button className="btn btn-danger" onClick={() => handleDeleteClick(hotel)}>Delete</button>
-                                        </td>
+                <div className="w-[25%]">
+                    <AdminNavBar activeItem={"hotel"} />
+                </div>
+                <div className="w-[2px] bg-[#F69412]"></div>
+                <div className='bg-[#EFEFEF] w-full'>
+                    <div className='bg-[#D9D9D9] flex items-center h-[8%]  pl-5'>
+                        <h1 className="text-2xl font-semibold">Hotel Management</h1>
+                    </div>
+                    <div className='h-[92%] p-4'>
+                        <button className="btn btn-primary mb-4" onClick={handleAddClick}>Add Hotel</button>
+                        <div className="overflow-x-auto">
+                            <table className="table w-full">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Phone Number</th>
+                                        <th>Description</th>
+                                        <th>Packages</th>
+                                        <th>Address</th>
+                                        <th>Email</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {hotels.map(hotel => (
+                                        <tr key={hotel.HotelID}>
+                                            <td>{hotel.HotelID}</td>
+                                            <td>{hotel.Name}</td>
+                                            <td>{hotel.HotType}</td>
+                                            <td>{hotel.PhoneNumber}</td>
+                                            <td>{hotel.HotDesc}</td>
+                                            <td>{hotel.Packages}</td>
+                                            <td>{hotel.Address}</td>
+                                            <td>{hotel.Email}</td>
+                                            <td>
+                                                <button className="btn btn-primary mr-2" onClick={() => handleUpdateClick(hotel)}>Update</button>
+                                                <button className="btn btn-danger" onClick={() => handleDeleteClick(hotel)}>Delete</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     {/* Add Modal */}

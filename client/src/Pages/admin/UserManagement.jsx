@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AdminSideBar from '../../Components/admin/AdminSideBar';
 import instance from '../../api';
 import AdminNavBar from '../../Components/admin/Navbar';
+import Swal from 'sweetalert2';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -21,6 +21,7 @@ const UserManagement = () => {
         GuiType: '',
         Qualifications: ''
     });
+    const [editMode, setEditMode] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
@@ -47,30 +48,56 @@ const UserManagement = () => {
     };
 
     const handleDelete = async (UserId) => {
-        try {
-            await instance.delete(`/user/deleteUser/${UserId}`);
-            toast.success('User deleted successfully');
-            fetchUsers();
-        } catch (error) {
-            toast.error('Failed to delete user');
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await instance.delete(`/user/deleteUser/${UserId}`);
+                toast.success('User deleted successfully');
+                fetchUsers();
+            } catch (error) {
+                toast.error('Failed to delete user');
+            }
         }
+    };
+
+    const validatePhoneNumber = (phoneNumber) => {
+        const phoneRegex = /^07\d{8}$/; // Phone number should start with '07' and followed by 8 digits
+        return phoneRegex.test(phoneNumber);
     };
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        if (!validatePhoneNumber(newUser.PhoneNumber)) {
+            toast.error('Invalid phone number');
+            return;
+        }
         try {
-            if (newUser.Role === 'Customer') {
-                await instance.post('user/registerCustomer', newUser);
-            } else if (newUser.Role === 'Guide') {
-                await instance.post('user/registerGuide', newUser);
-            } else if (newUser.Role === 'Staff') {
-                await instance.post('user/registerStaff', newUser);
+            if (editMode) {
+                await instance.put(`/user/updateUser/${newUser.UserID}`, newUser);
+                toast.success('User updated successfully');
+            } else {
+                if (newUser.Role === 'Customer') {
+                    await instance.post('user/registerCustomer', newUser);
+                } else if (newUser.Role === 'Guide') {
+                    await instance.post('user/registerGuide', newUser);
+                } else if (newUser.Role === 'Staff') {
+                    await instance.post('user/registerStaff', newUser);
+                }
+                toast.success('User registered successfully');
             }
-            toast.success('User registered successfully');
             setShowModal(false);
             fetchUsers();
         } catch (error) {
-            toast.error('Failed to register user');
+            toast.error('Failed to register/update user');
         }
     };
 
@@ -82,11 +109,34 @@ const UserManagement = () => {
         });
     };
 
+    const handleEdit = (user) => {
+        setNewUser(user);
+        setEditMode(true);
+        setShowModal(true);
+    };
+
+    const resetForm = () => {
+        setNewUser({
+            FirstName: '',
+            LastName: '',
+            Email: '',
+            PhoneNumber: '',
+            Password: '',
+            Role: 'Customer',
+            Country: '',
+            VehicleID: '',
+            Languages: '',
+            GuiType: '',
+            Qualifications: ''
+        });
+        setEditMode(false);
+    };
+
     return (
         <>
             <div className='flex flex-row'>
                 <div className="w-[25%]">
-                    <AdminNavBar activeItem={"chat"} />
+                    <AdminNavBar activeItem={"user"} />
                 </div>
                 <div className="w-[2px] bg-[#F69412]"></div>
                 <div className='bg-[#EFEFEF] w-full'>
@@ -94,7 +144,12 @@ const UserManagement = () => {
                         <h1 className="text-2xl font-semibold">User Management</h1>
                     </div>
                     <div className='h-[92%] p-4'>
-                        <button className='btn btn-primary mb-4' onClick={() => setShowModal(true)}>Add User</button>
+                        <button
+                            className='btn btn-primary mb-4'
+                            onClick={() => { resetForm(); setShowModal(true); }}
+                        >
+                            Add User
+                        </button>
                         <table className='table w-full'>
                             <thead>
                                 <tr>
@@ -117,7 +172,8 @@ const UserManagement = () => {
                                         <td>{user.PhoneNumber}</td>
                                         <td>{user.Role}</td>
                                         <td>
-                                            <button className='btn btn-danger' onClick={() => handleDelete(user.UserID)}>Delete</button>
+                                            <button className='btn' style={{ backgroundColor: '#c79500',color:'#fff' }} onClick={() => handleEdit(user)}> Edit </button>
+                                            <button className='btn' style={{ backgroundColor: '#730000',color:'#fff' }} onClick={() => handleDelete(user.UserID)}>Delete</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -130,13 +186,15 @@ const UserManagement = () => {
             {showModal && (
                 <div className='fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 w-full modal modal-open'>
                     <div className='bg-white p-4 rounded-lg w-96 modal-box'>
-                        <h3 className='font-bold text-lg'>Register New User</h3>
+                        <h3 className='font-bold text-lg'>{editMode ? 'Edit User' : 'Register New User'}</h3>
                         <form onSubmit={handleRegister}>
                             <input type='text' name='FirstName' value={newUser.FirstName} onChange={handleChange} placeholder='First Name' className='input input-bordered w-full mb-4' required />
                             <input type='text' name='LastName' value={newUser.LastName} onChange={handleChange} placeholder='Last Name' className='input input-bordered w-full mb-4' required />
                             <input type='email' name='Email' value={newUser.Email} onChange={handleChange} placeholder='Email' className='input input-bordered w-full mb-4' required />
                             <input type='text' name='PhoneNumber' value={newUser.PhoneNumber} onChange={handleChange} placeholder='Phone Number' className='input input-bordered w-full mb-4' required />
-                            <input type='password' name='Password' value={newUser.Password} onChange={handleChange} placeholder='Password' className='input input-bordered w-full mb-4' required />
+                            {!editMode && (
+                                <input type='password' name='Password' value={newUser.Password} onChange={handleChange} placeholder='Password' className='input input-bordered w-full mb-4' required />
+                            )}
                             <select name='Role' value={newUser.Role} onChange={handleChange} className='select select-bordered w-full mb-4'>
                                 <option value='Customer'>Customer</option>
                                 <option value='Guide'>Guide</option>
@@ -159,8 +217,8 @@ const UserManagement = () => {
                                 </>
                             )}
                             <div className='modal-action'>
-                                <button type='button' className='btn btn-secondary' onClick={() => setShowModal(false)}>Cancel</button>
-                                <button type='submit' className='btn btn-primary'>Register</button>
+                                <button type='button' className='btn btn-secondary text-white' onClick={() => setShowModal(false)}>Cancel</button>
+                                <button type='submit' className='btn btn-primary'>{editMode ? 'Update' : 'Register'}</button>
                             </div>
                         </form>
                     </div>
