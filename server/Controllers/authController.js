@@ -60,7 +60,6 @@ router.get('/current-user', authGuard, (req, res) => {
         if (!user) {
             return res.status(400).send({ err: 'User not logged in' });
         }
-        // console.log(user)
         connection.query('SELECT * FROM User WHERE UserID = ?', [user.id], (err, rows) => {
             if (err) {
                 console.error('Error querying MySQL database:', err);
@@ -69,7 +68,7 @@ router.get('/current-user', authGuard, (req, res) => {
             }
 
             if (rows.length === 1) {
-                const { UserID, Email, Role } = rows[0];
+                //const { UserID, Email, Role } = rows[0];
                 res.json({ user});
             } else {
                 res.status(404).send({ err: 'User not found' });
