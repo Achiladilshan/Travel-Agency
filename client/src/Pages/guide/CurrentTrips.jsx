@@ -40,7 +40,9 @@ const CurrentTrips = () => {
     const [trackPoints, setTrackPoints] = useState([{ start: '', end: '' }]);
 
     const handleAddTrackPoint = () => {
-        setTrackPoints([...trackPoints, { start: '', end: '' }]);
+        const newTrackPoint = { start: '', end: '' };
+        const updatedTrackPoints = [...trackPoints, newTrackPoint];
+        setTrackPoints(updatedTrackPoints);
     };
 
     const handleDeleteTrackPoint = (index) => {
@@ -157,23 +159,12 @@ const CurrentTrips = () => {
         window.location.reload();
     }
 
-    // Create buttons based on tripDays array
-    const buttons = tripDays.map((dateObj, index) => (
-        <button
-            key={index}
-            className="btn btn-primary m-1"
-            onClick={() => setSelectedDay(dateObj.date)}
-        >
-            {dateObj.formattedDate}
-        </button>
-    ));
-
     // Content to render for each day
     const renderDayContent = (date) => {
         const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
         return (
-            <div>  
-                <LoadScript googleMapsApiKey="AIzaSyAVBI86obkebwHt55zzGlgU8rC6V9h8C4A" libraries={libraries} onLoad={handleLoad}>
+            <div>
+                {/* <LoadScript googleMapsApiKey="AIzaSyAVBI86obkebwHt55zzGlgU8rC6V9h8C4A" libraries={libraries} onLoad={handleLoad}>
                     {isLoaded && (
                         // Your Autocomplete component and other code here
                         <Autocomplete
@@ -191,9 +182,50 @@ const CurrentTrips = () => {
                             />
                         </Autocomplete>
                     )}
-                </LoadScript>
+                </LoadScript> */}
+                {trackPoints.map((point, index) => (
+                    <div key={index} className="mb-4 flex items-center">
+                        <LoadScript googleMapsApiKey="AIzaSyAVBI86obkebwHt55zzGlgU8rC6V9h8C4A" libraries={libraries} onLoad={handleLoad}>
+                            {isLoaded && (
+                                <React.Fragment>
+                                    {/* Autocomplete for starting point */}
+                                    <Autocomplete
+                                        onLoad={(autocomplete) => (startAutocomplete[index] = autocomplete)}
+                                        onPlaceChanged={() => onStartPlaceChanged(index)}
+                                    >
+                                        <input
+                                            type="text"
+                                            placeholder="Enter starting point"
+                                            className="input input-bordered w-full mr-4"
+                                        />
+                                    </Autocomplete>
+                                    {/* Autocomplete for ending point */}
+                                    <Autocomplete
+                                        onLoad={(autocomplete) => (endAutocomplete[index] = autocomplete)}
+                                        onPlaceChanged={() => onEndPlaceChanged(index)}
+                                    >
+                                        <input
+                                            type="text"
+                                            placeholder="Enter ending point"
+                                            className="input input-bordered w-full mr-4"
+                                        />
+                                    </Autocomplete>
+                                </React.Fragment>
+                            )}
+                        </LoadScript>
+                        {/* Delete button for removing track point */}
+                        {index !== 0 &&
+                            <button onClick={() => handleDeleteTrackPoint(index)} className="btn btn-error">
+                                Delete
+                            </button>
+                        }
+                    </div>
+                ))}
+                <button onClick={handleAddTrackPoint} className="btn btn-primary">
+                    Add Track Point
+                </button>
             </div>
-        );
+        )
     };
 
     return (
@@ -284,7 +316,20 @@ const CurrentTrips = () => {
                         <div className="p-4">
                             {currentTab === 'dailyDistance' && (
                                 <div>
-                                    <div>{buttons}</div>
+                                    <div>
+                                        <label htmlFor="date-dropdown" className="block font-semibold mb-2">Select a Date</label>
+                                        <select id="date-dropdown" className="input input-bordered w-full" onChange={(e) => setSelectedDay(new Date(e.target.value))}>
+                                            <option value="">Select</option>
+                                            {/* Map through tripDays to create options for each date */}
+                                            {tripDays.map((dateObj, index) => (
+                                                <option key={index} value={dateObj.date.toISOString().split('T')[0]}>
+                                                    {/* Include year in the formatted date */}
+                                                    {dateObj.date.getFullYear()}/{dateObj.date.getMonth() + 1}/{dateObj.date.getDate()}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
                                     <div className='mt-8'>
                                         {selectedDay && renderDayContent(selectedDay)}
                                     </div>
