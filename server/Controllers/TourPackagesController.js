@@ -1,12 +1,49 @@
+const express = require('express');
+const bodyParser = require('body-parser');
 const connection = require('../Config/db');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+
+const router = express.Router();
+
+router.use(bodyParser.json());
+
+
+// Create PackageImages directory if it doesn't exist
+const uploadDirectory = 'PackageImages';
+if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory);
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDirectory);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const filename = `${uniqueSuffix}_${file.originalname}`;
+        cb(null, filename);
+    },
+});
+
+const upload = multer({ storage: storage });
 
 // Add a new tour package
 const addTourPackage = (req, res) => {
     const { Name, Description, Price, Itinerary, NoOfDates } = req.body;
 
+    // Check if image file is uploaded
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const imageUrl = `${req.protocol}://${req.get('host')}/${req.file.path}`;
+
     connection.query(
-        'INSERT INTO TourPackages (Name, Description, Price, Itinerary, NoOfDates) VALUES (?, ?, ?, ?, ?)',
-        [Name, Description, Price, Itinerary, NoOfDates],
+        'INSERT INTO TourPackages (Name, Description, Price, Itinerary, NoOfDates, Photo) VALUES (?, ?, ?, ?, ?, ?)',
+        [Name, Description, Price, Itinerary, NoOfDates, imageUrl],
         (err, result) => {
             if (err) {
                 console.error('Error inserting tour package:', err);
@@ -87,5 +124,6 @@ module.exports = {
     getAllTourPackages,
     getTourPackageById,
     updateTourPackage,
-    deleteTourPackage
+    deleteTourPackage,
+    upload
 };

@@ -126,8 +126,34 @@ const TourPackage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setSelectedPackage({ ...selectedPackage, [name]: value });
+        let newValue = value; // Initialize the new value
+
+        // Validation rules based on input name
+        switch (name) {
+            case 'Name':
+                // Allow only alphabets, numbers, and spaces
+                newValue = value.replace(/[^A-Za-z0-9 ]/ig, '');
+                break;
+            case 'Price':
+                // Allow only numbers and ensure maximum 9 digits, exclude full stop
+                newValue = value.replace(/[^0-9]/g, '').slice(0, 9);
+                break;
+            case 'NoOfDates':
+                // Allow only numbers and ensure maximum 3 digits
+                newValue = value.replace(/\D/g, '').slice(0, 3);
+                break;
+            // Add more cases for other inputs if needed
+            default:
+                break;
+        }
+
+        // Update the selectedPackage state with the new value
+        setSelectedPackage({ ...selectedPackage, [name]: newValue });
+
+        // Validate other fields if needed
+        // Replace with your validation logic for other fields, similar to your existing formErrors checks
     };
+
 
     if (loading) {
         return <div>Loading...</div>;
