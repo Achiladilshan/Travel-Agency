@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminNavBar from '../../Components/admin/Navbar';
 import instance from '../../api';
 import { toast, ToastContainer } from 'react-toastify';
+import { Button } from '@mui/material';
 import 'react-toastify/dist/ReactToastify.css';
 import 'daisyui/dist/full.css'; // Ensure DaisyUI is properly imported
 
@@ -13,6 +14,7 @@ const TourPackage = () => {
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errors, setErrors] = useState({});
+    const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         fetchPackages();
@@ -37,8 +39,14 @@ const TourPackage = () => {
             Itinerary: '',
             NoOfDates: ''
         });
+        setSelectedImage(null);
         setErrors({});
         setShowAddModal(true);
+    };
+
+    const handleImageChange = (event) => {
+        const imageFile = event.target.files[0];
+        setSelectedImage(imageFile);
     };
 
     const handleUpdateClick = (pkg) => {
@@ -67,12 +75,29 @@ const TourPackage = () => {
     const handleAddPackage = async () => {
         if (!validateInputs()) return;
         try {
-            await instance.post('/tourPackages/addTourPackage', selectedPackage);
-            toast.success('Tour package added successfully');
-            setShowAddModal(false);
-            fetchPackages();
+            if (selectedImage != null) {
+                const formData = new FormData();
+                formData.append('image', selectedImage);
+                formData.append('Name', selectedPackage.Name);
+                formData.append('Description', selectedPackage.Description);
+                formData.append('Price', selectedPackage.Price);
+                formData.append('Itinerary', selectedPackage.Itinerary);
+                formData.append('NoOfDates', selectedPackage.NoOfDates);
+
+                await instance.post('/tourPackages/addTourPackage', formData);
+                toast.success('Tour package added successfully');
+                setShowAddModal(false);
+                fetchPackages();
+            }
+            else {
+                throw new Error('Select an Image to Upload');
+            }
         } catch (error) {
-            toast.error('Failed to add tour package');
+            if (error.message === 'Select an Image to Upload') {
+                toast.error('Please select an Image to upload');
+            } else {
+                toast.error('Failed to add tour package');
+            }
         }
     };
 
@@ -187,6 +212,24 @@ const TourPackage = () => {
                                     <textarea rows={4} name="Itinerary" value={selectedPackage.Itinerary} onChange={handleInputChange} className="textarea textarea-bordered" />
                                     {errors.Itinerary && <p className="text-red-500">{errors.Itinerary}</p>}
                                 </div>
+                                <div className='mt-4'>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        style={{ display: 'none' }} // Hide the default file input UI
+                                        id="imageInput"
+                                    />
+                                    <label htmlFor="imageInput">
+                                        <Button variant="outlined" component="span">Choose Photo</Button>
+                                    </label>
+                                    {selectedImage && (
+                                        <div>
+                                            <p>Selected Image:</p>
+                                            <img src={URL.createObjectURL(selectedImage)} alt="Selected" style={{ maxWidth: '200px' }} />
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="modal-action">
                                     <button className="btn btn-primary" onClick={handleAddPackage}>Save</button>
                                     <button className="btn" onClick={() => setShowAddModal(false)}>Cancel</button>
@@ -211,16 +254,16 @@ const TourPackage = () => {
                                     {errors.Description && <p className="text-red-500">{errors.Description}</p>}
                                 </div>
                                 <div className="form-control grid grid-cols-2 gap-4">
-                                <div className="form-control">
-                                    <label className="label">Price</label>
-                                    <input type="number" name="Price" value={selectedPackage.Price} onChange={handleInputChange} className="input input-bordered" />
-                                    {errors.Price && <p className="text-red-500">{errors.Price}</p>}
-                                </div>
-                                <div className="form-control">
-                                    <label className="label">No. of Days</label>
-                                    <input type="number" name="NoOfDates" value={selectedPackage.NoOfDates} onChange={handleInputChange} className="input input-bordered" />
-                                    {errors.NoOfDates && <p className="text-red-500">{errors.NoOfDates}</p>}
-                                </div>
+                                    <div className="form-control">
+                                        <label className="label">Price</label>
+                                        <input type="number" name="Price" value={selectedPackage.Price} onChange={handleInputChange} className="input input-bordered" />
+                                        {errors.Price && <p className="text-red-500">{errors.Price}</p>}
+                                    </div>
+                                    <div className="form-control">
+                                        <label className="label">No. of Days</label>
+                                        <input type="number" name="NoOfDates" value={selectedPackage.NoOfDates} onChange={handleInputChange} className="input input-bordered" />
+                                        {errors.NoOfDates && <p className="text-red-500">{errors.NoOfDates}</p>}
+                                    </div>
                                 </div>
                                 <div className="form-control">
                                     <label className="label">Itinerary</label>

@@ -112,45 +112,91 @@ const TourManage = () => {
         <div className="w-full p-4">
           <button className="btn" onClick={() => setShowModal(true)}>Create Tour</button>
           <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting }) => (
-              <Form>
-                {/* Modal for creating tour */}
-                <div className={`modal ${showModal ? 'modal-open' : ''}`}>
-                  <div className="modal-box">
-                    <h1 className="text-2xl font-bold mb-4">Create Tour</h1>
-                    {/* Form fields */}
-                    <div className="mb-4">
-                      <label htmlFor="customerID" className="block text-sm font-medium text-gray-700">Select Customer:</label>
-                      {/* Input for searching customer */}
-                      <input type="text" name="selectCustomerID" value={inputData} onChange={handleSearch} className="mt-1 p-2 w-full border bg-white border-gray-300 rounded-md" />
-                      {/* Dropdown for selecting customer */}
-                      <Field as="select" name="customerID" className="mt-1 p-2 w-full border border-gray-300 bg-white rounded-md">
-                        <option value="">Select Customer</option>
-                        {selectedUser && selectedUser.map(user => (
-                          <option key={user.UserID} value={user.UserID}>{user.FirstName}</option>
-                        ))}
-                      </Field>
-                      <ErrorMessage name="customerID" component="div" className="text-red-500 text-sm" />
-                    </div>
-                    {/* Similar structure for selecting guide and other form fields */}
-                    {/* Submit and cancel buttons */}
-                    <div className="modal-action">
-                      <button type="submit" disabled={isSubmitting} className="btn btn-primary">
-                        {isSubmitting ? "Submitting..." : "Submit"}
-                      </button>
-                      <button className="btn btn-danger" onClick={() => setShowModal(false)}>
-                        Cancel
-                      </button>
-                    </div>
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <div className={`modal ${showModal ? 'modal-open' : ''}`}>
+                <div className="modal-box">
+                  <h1 className="text-2xl font-bold mb-4">Create Tour</h1>
+                  <div className="mb-4">
+                    <label htmlFor="customerID" className="block text-sm font-medium text-gray-700">Select Customer:</label>
+                    <input type="text" name="selectCustomerID" value={inputData} onChange={handleSearch} className="mt-1 p-2 w-full border bg-white border-gray-300 rounded-md" />
+                    <Field as="select" name="customerID" className="mt-1 p-2 w-full border border-gray-300 bg-white rounded-md">
+                      <option value="">Select Customer</option>
+                      {selectedUser && selectedUser.map(user => (
+                        <option key={user.UserID} value={user.UserID}>{user.FirstName}</option>
+                      ))}
+                    </Field>
+                    <ErrorMessage name="customerID" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="guideID" className="block text-sm font-medium text-gray-700">Select Guide:</label>
+                    <input type="text" name="selectGuideID" value={inputData1} onChange={handleGuideSearch} className="mt-1 p-2 w-full border bg-white border-gray-300 rounded-md" />
+                    <Field as="select" name="guideID" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white">
+                      <option value="">Select Guide</option>
+                      {selectedGuide && selectedGuide.map(user => (
+                        <option key={user.UserID} value={user.UserID}>{user.FirstName} {user.LastName}</option>
+                      ))}
+                    </Field>
+                    <ErrorMessage name="guideID" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price:</label>
+                    <Field type="number" name="price" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="price" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date:</label>
+                    <Field type="date" name="startDate" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="startDate" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date:</label>
+                    <Field type="date" name="endDate" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="endDate" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="adultsCount" className="block text-sm font-medium text-gray-700">Number of Adults:</label>
+                    <Field type="number" name="adultsCount" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="adultsCount" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="childrenCount" className="block text-sm font-medium text-gray-700">Number of Children:</label>
+                    <Field type="number" name="childrenCount" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="childrenCount" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description:</label>
+                    <Field as="textarea" name="description" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="description" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="specialNotes" className="block text-sm font-medium text-gray-700">Special Notes:</label>
+                    <Field as="textarea" name="specialNotes" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="specialNotes" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="totalDistance" className="block text-sm font-medium text-gray-700">Total Distance:</label>
+                    <Field type="number" name="totalDistance" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                    <ErrorMessage name="totalDistance" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  {/* Submit and cancel buttons */}
+                  <div className="modal-action">
+                    <button type="submit" disabled={isSubmitting} className="btn btn-primary" >
+                      {isSubmitting ? "Submitting..." : "Submit"}
+                    </button>
+                    <button className="btn btn-danger" onClick={() => setShowModal(false)}>
+                      Cancel
+                    </button>
                   </div>
                 </div>
-              </Form>
-            )}
-          </Formik>
+              </div>
+            </Form>
+          )}
+        </Formik>
           {/* Component to display tours */}
           <TourList tours={tours} />
         </div>

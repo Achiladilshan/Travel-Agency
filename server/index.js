@@ -18,6 +18,7 @@ const DailyDistanceRouter = require('./Routes/DailyDistance.route');
 const CustomerPaymentRouter = require('./Routes/CustomerPayment.route');
 const VehicleRouter = require('./Routes/Vehicle.route');
 const TripRouter = require('./Routes/Trip.route');
+const InquiryRouter = require('./Routes/Inquiry.route');
 
 
 app.use(cors({
@@ -48,6 +49,7 @@ app.use('/dailyDistance', DailyDistanceRouter);
 app.use('/customerPayment' , CustomerPaymentRouter);
 app.use('/vehicle', VehicleRouter);
 app.use('/trip' , TripRouter);
+app.use('/inquiry', InquiryRouter);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
