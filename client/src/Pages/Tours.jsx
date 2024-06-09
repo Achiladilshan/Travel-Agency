@@ -26,7 +26,7 @@ const Tours = () => {
       <Navbar activeItem={'TOURS'} buttonState={'LOGIN'} buttonLoc={'/login'} />
       <div className="flex flex-wrap justify-center">
         {tourPackages.map(tourPackage => (
-          <div key={tourPackage.id} className="w-48 sm:w-64 md:w-72 lg:w-1/4 m-4">
+          <div key={tourPackage.PackageID} className="w-48 sm:w-64 md:w-72 lg:w-1/4 m-4">
             <TourCard
               name={tourPackage.Name}
               description={tourPackage.Description}
@@ -42,7 +42,7 @@ const Tours = () => {
           <CustomTourCard
             imageSrc={tourImageCustom}
             buttonText="For more information"
-            buttonLink="/more-info-custom"
+            buttonLink="/inquire"
           />
         </div>
       </div>

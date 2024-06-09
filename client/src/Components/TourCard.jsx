@@ -11,7 +11,7 @@ const TourCard = ({ name, description, price, itinerary, days, imageSrc, buttonT
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <img className="w-full h-32 sm:h-48 md:h-56 lg:h-64 object-cover" src={imageSrc} alt={`Tour ${days} days`} />
       <div className="p-4">
-        <h2 className="text-lg font-semibold">{days} Days Tour</h2>
+        <h2 className="text-lg font-semibold">{name}</h2>
         <button
           className="mt-2 bg-customYellow hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded"
           onClick={toggleModal}
@@ -29,7 +29,7 @@ const TourCard = ({ name, description, price, itinerary, days, imageSrc, buttonT
               <textarea
                 className="border-black bg-white border w-full p-2 rounded-md"
                 value={description}
-                rows={6}
+                rows={3}
                 readOnly
               />
             </div>
@@ -38,7 +38,7 @@ const TourCard = ({ name, description, price, itinerary, days, imageSrc, buttonT
               <textarea
                 className="border-black bg-white border w-full p-2 rounded-md mb-4"
                 value={itinerary}
-                rows={6}
+                rows={10}
                 readOnly
               />
             </div>

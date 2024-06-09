@@ -191,8 +191,8 @@ const HotelManagement = () => {
                                             <td>{hotel.Address}</td>
                                             <td>{hotel.Email}</td>
                                             <td>
-                                                <button className="btn btn-primary mr-2" onClick={() => handleUpdateClick(hotel)}>Update</button>
-                                                <button className="btn btn-danger" onClick={() => handleDeleteClick(hotel)}>Delete</button>
+                                                <button className="btn mr-3" style={{ backgroundColor: '#c79500',color:'#fff' }} onClick={() => handleUpdateClick(hotel)}>Update</button>
+                                                <button className="btn" style={{ backgroundColor: '#730000',color:'#fff' }} onClick={() => handleDeleteClick(hotel)}>Delete</button>
                                             </td>
                                         </tr>
                                     ))}
@@ -290,7 +290,7 @@ const HotelManagement = () => {
                                 <h2 className="font-bold text-lg">Delete Hotel</h2>
                                 <p>Are you sure you want to delete this hotel?</p>
                                 <div className="modal-action">
-                                    <button className="btn btn-danger" onClick={handleDeleteHotel}>Delete</button>
+                                    <button className="btn " style={{ backgroundColor: '#730000',color:'#fff' }} onClick={handleDeleteHotel}>Delete</button>
                                     <button className="btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
                                 </div>
                             </div>

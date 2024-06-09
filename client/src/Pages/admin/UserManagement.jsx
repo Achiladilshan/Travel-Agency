@@ -172,7 +172,7 @@ const UserManagement = () => {
                                         <td>{user.PhoneNumber}</td>
                                         <td>{user.Role}</td>
                                         <td>
-                                            <button className='btn' style={{ backgroundColor: '#c79500',color:'#fff' }} onClick={() => handleEdit(user)}> Edit </button>
+                                            <button className='btn mr-3' style={{ backgroundColor: '#c79500',color:'#fff' }} onClick={() => handleEdit(user)}> Edit </button>
                                             <button className='btn' style={{ backgroundColor: '#730000',color:'#fff' }} onClick={() => handleDelete(user.UserID)}>Delete</button>
                                         </td>
                                     </tr>

@@ -11,15 +11,7 @@ TourPackagesrouter.get('/getAllTourPackages', tourPackagesController.getAllTourP
 
 TourPackagesrouter.get('/getTourPackage/:PackageID', tourPackagesController.getTourPackageById);
 
-TourPackagesrouter.put('/updateTourPackage/:PackageID', 
-    validate([
-        body('Name').isString().withMessage('Name must be a string'),
-        body('Description').isString().withMessage('Description must be a string'),
-        body('Price').isFloat().withMessage('Price must be a number'),
-        body('Itinerary').isString().withMessage('Itinerary must be a string'),
-        body('NoOfDates').isInt().withMessage('NoOfDates must be an integer'),
-    ]), 
-    tourPackagesController.updateTourPackage
+TourPackagesrouter.put('/updateTourPackage/:PackageID', upload.single('image'), tourPackagesController.updateTourPackage
 );
 
 TourPackagesrouter.delete('/deleteTourPackage/:PackageID', tourPackagesController.deleteTourPackage);
