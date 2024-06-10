@@ -136,11 +136,6 @@ const Inquire = () => {
                   <Field type="tel" name="mobile" className="border-black bg-white border w-full p-2 rounded-md" />
                   <ErrorMessage name="mobile" component="div" className="text-red-600" />
                 </div>
-                {/* <div className="mb-4">
-                <label className="block mb-1">Living Country:</label>
-                <Field type="text" name="livingCountry" className="border-black bg-white border w-full p-2 rounded-md" />
-                <ErrorMessage name="livingCountry" component="div" className="text-red-600" />
-              </div> */}
                 <div className="mb-4">
                   <label className="block mb-1">Arrival Date:</label>
                   <DatePicker

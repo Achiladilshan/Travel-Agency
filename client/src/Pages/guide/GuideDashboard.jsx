@@ -515,7 +515,7 @@ const GuideDashboard = () => {
                       onChange={(e) => handleInputChangeprofile(e, setGuide)}
                       className="input input-bordered"
                     >
-                      <option value="A grade guide">Chauffeur Guide</option>
+                      <option value="Chauffeur Guide">Chauffeur Guide</option>
                       <option value="National Guide">National Guide</option>
                     </select>
                     {errors.GuiType && <p className="text-red-500">{errors.GuiType}</p>}

@@ -67,12 +67,13 @@ function Feedback() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/4 bg-gray-200">
+    <div className="flex">
+      <div className="w-[25%]">
         <Navbar activeItem={"feedback"} />
       </div>
-      <div className="flex-grow bg-[#EFEFEF] px-5 py-8">
-        <h1 className="text-2xl font-semibold mb-4">Feedback</h1>
+      <div className= "w-[2px] bg-[#F69412]"></div>
+      <div className="bg-[#EFEFEF] pl-5 w-lvw">
+        <h1 className="text-2xl font-semibold my-4">Feedback</h1>
         <p>
           We would like to please to know your valuable comments and look
           forward to continuous improvement of our service.

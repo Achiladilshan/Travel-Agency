@@ -26,7 +26,7 @@ function CurrentTrips() {
   return (
     <div className='flex'>
       <div className= "w-[25%]">
-        <Navbar activeItem={"currenttrip"}/>
+        <Navbar activeItem={"current-trip"}/>
       </div>
       <div className= "w-[2px] bg-[#F69412]">
       </div>

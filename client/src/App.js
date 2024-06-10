@@ -42,9 +42,9 @@ function App() {
         <Route exact path="/inquire" element={<Inquire />}/>
         <Route element={<ProtectedCustomertRoute/>}>
           <Route exact path="/Customer-Dashboard" element={<CustomerDashboard />}/>
-          <Route exact path="/Customer-Dashboard/current-trip" element={<CustomerCurrent />}/>
-          <Route exact path="/Customer-Dashboard/previous-trips" element={<CustomerPrevious />}/>
-          <Route exact path="/Customer-Dashboard/feedback" element={<CustomerFeedback />}/>
+          <Route exact path="/Customer/current-trip" element={<CustomerCurrent />}/>
+          <Route exact path="/Customer/previous-trip" element={<CustomerPrevious />}/>
+          <Route exact path="/Customer/feedbacks" element={<CustomerFeedback />}/>
         </Route>
         <Route element={<ProtectedAdminRoute/>}>
           <Route path="/admin-dashboard" element={<AdminDashboard/>} />

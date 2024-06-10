@@ -20,7 +20,7 @@ const Navbar = ({ activeItem }) => {
     setActiveLink(link); // Update active link
     localStorage.setItem('activeLink', link);
     if (link === 'logout') {
-      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
       localStorage.removeItem("activeLink");
     }
     const targetLink = link === 'logout' ? 'login' : link === 'dashboard' ? 'admin-dashboard' : `admin/${link}`;

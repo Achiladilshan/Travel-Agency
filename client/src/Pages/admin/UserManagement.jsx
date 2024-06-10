@@ -4,10 +4,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import instance from '../../api';
 import AdminNavBar from '../../Components/admin/Navbar';
 import Swal from 'sweetalert2';
+import { TextField } from '@mui/material';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
-    const [vehicles, setVehicles] = useState([]);
+    const [errors, setErrors] = useState({});
     const [newUser, setNewUser] = useState({
         FirstName: '',
         LastName: '',
@@ -16,7 +17,11 @@ const UserManagement = () => {
         Password: '',
         Role: 'Customer',
         Country: '',
-        VehicleID: '',
+        VehicleType: '',
+        VehicleMake: '',
+        Capacity: '',
+        Number: '',
+        Description: '',
         Languages: '',
         GuiType: '',
         Qualifications: ''
@@ -26,7 +31,6 @@ const UserManagement = () => {
 
     useEffect(() => {
         fetchUsers();
-        fetchVehicles();
     }, []);
 
     const fetchUsers = async () => {
@@ -35,15 +39,6 @@ const UserManagement = () => {
             setUsers(response.data);
         } catch (error) {
             toast.error('Failed to fetch users');
-        }
-    };
-
-    const fetchVehicles = async () => {
-        try {
-            const response = await instance.get('/vehicle/');
-            setVehicles(response.data);
-        } catch (error) {
-            toast.error('Failed to fetch vehicles');
         }
     };
 
@@ -134,6 +129,7 @@ const UserManagement = () => {
 
     return (
         <>
+            <ToastContainer />
             <div className='flex flex-row'>
                 <div className="w-[25%]">
                     <AdminNavBar activeItem={"user"} />
@@ -172,8 +168,8 @@ const UserManagement = () => {
                                         <td>{user.PhoneNumber}</td>
                                         <td>{user.Role}</td>
                                         <td>
-                                            <button className='btn mr-3' style={{ backgroundColor: '#c79500',color:'#fff' }} onClick={() => handleEdit(user)}> Edit </button>
-                                            <button className='btn' style={{ backgroundColor: '#730000',color:'#fff' }} onClick={() => handleDelete(user.UserID)}>Delete</button>
+                                            <button className='btn mr-3' style={{ backgroundColor: '#c79500', color: '#fff' }} onClick={() => handleEdit(user)}> Edit </button>
+                                            <button className='btn' style={{ backgroundColor: '#730000', color: '#fff' }} onClick={() => handleDelete(user.UserID)}>Delete</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -197,6 +193,7 @@ const UserManagement = () => {
                             )}
                             <select name='Role' value={newUser.Role} onChange={handleChange} className='select select-bordered w-full mb-4'>
                                 <option value='Customer'>Customer</option>
+                                <option value='Admin'>Admin</option>
                                 <option value='Guide'>Guide</option>
                                 <option value='Staff'>Staff</option>
                             </select>
@@ -205,15 +202,73 @@ const UserManagement = () => {
                             )}
                             {newUser.Role === 'Guide' && (
                                 <>
-                                    <select name='VehicleID' value={newUser.VehicleID} onChange={handleChange} className='select select-bordered w-full mb-4' required>
-                                        <option value=''>Select Vehicle</option>
-                                        {vehicles.map(vehicle => (
-                                            <option key={vehicle.VehicleID} value={vehicle.VehicleID}>{vehicle.VehicleNumber}</option>
-                                        ))}
-                                    </select>
+
                                     <input type='text' name='Languages' value={newUser.Languages} onChange={handleChange} placeholder='Languages' className='input input-bordered w-full mb-4' required />
-                                    <input type='text' name='GuiType' value={newUser.GuiType} onChange={handleChange} placeholder='Guide Type' className='input input-bordered w-full mb-4' required />
+                                    <select
+                                        name="GuiType"
+                                        value={newUser.GuiType || ""}
+                                        onChange={handleChange}
+                                        className="select select-bordered w-full mb-4"
+                                    >
+                                        <option value="Chauffeur Guide">Chauffeur Guide</option>
+                                        <option value="National Guide">National Guide</option>
+                                    </select>
                                     <input type='text' name='Qualifications' value={newUser.Qualifications} onChange={handleChange} placeholder='Qualifications' className='input input-bordered w-full mb-4' required />
+                                    <label className="label">Vehicle Type</label>
+                                    <select
+                                        name="Type"
+                                        value={newUser.VehicleType || ""}
+                                        onChange={handleChange}
+                                        className="select select-bordered w-full mb-4"
+                                    >
+                                        <option value="Van">Van</option>
+                                        <option value="Car">Car</option>
+                                        <option value="Bus">Bus</option>
+                                    </select>
+                                    {errors.type && <p className="text-red-500">{errors.type}</p>}
+                                    <label className="label">Make<span className="opacity-50">(ex: Toyota KDH)</span></label>
+                                    <input
+                                        type="text"
+                                        name="Make"
+                                        value={newUser.VehicleMake || ""}
+                                        onChange={handleChange}
+                                        className="input input-bordered w-full mb-4"
+                                    />
+                                    {errors.make && <p className="text-red-500">{errors.make}</p>}
+
+                                        <label className="label">Capacity</label>
+                                        <input
+                                            type="text"
+                                            name="Capacity"
+                                            value={newUser.Capacity || ""}
+                                            onChange={handleChange}
+                                            className="input input-bordered w-full mb-4"
+                                        />
+                                        {errors.capacity && <p className="text-red-500">{errors.capacity}</p>}
+              
+                  
+                                        <label className="label">Vehicle Number<span className="opacity-50">(ex: ABC4989 or KX3121)</span></label>
+                                        <input
+                                            type="text"
+                                            name="VehicleNumber"
+                                            value={newUser.Number || ""}
+                                            onChange={handleChange}
+                                            className="input input-bordered w-full mb-4"
+                                        />
+                                        {errors.vehicleNumber && <p className="text-red-500">{errors.vehicleNumber}</p>}
+      
+                  
+                                        <label className="label">Description</label>
+                                        <TextField
+                                            name="Description"
+                                            fullWidth
+                                            value={newUser.Description || ""}
+                                            onChange={handleChange}
+                                            multiline
+                                            rows={5}
+                                        />
+                                        {errors.description && <p className="text-red-500">{errors.description}</p>}
+         
                                 </>
                             )}
                             <div className='modal-action'>

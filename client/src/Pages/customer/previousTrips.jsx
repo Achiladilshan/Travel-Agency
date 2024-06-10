@@ -22,7 +22,7 @@ function PreviousTrips() {
   return (
     <div className='flex'>
       <div className= "w-[25%]">
-        <Navbar activeItem={"previoustrip"}/>
+        <Navbar activeItem={"previous-trip"}/>
       </div>
       <div className= "w-[2px] bg-[#F69412]">
       </div>
