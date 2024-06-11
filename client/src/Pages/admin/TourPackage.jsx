@@ -16,19 +16,35 @@ const TourPackage = () => {
     const [errors, setErrors] = useState({});
     const [selectedImage, setSelectedImage] = useState(null);
     const [updateselectedImage, setUpdateSelectedImage] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         fetchPackages();
-    }, []);
+    }, [currentPage]);
 
     const fetchPackages = async () => {
         try {
-            const response = await instance.get('/tourPackages/getAllTourPackages');
-            setPackages(response.data);
+            const response = await instance.get('/tourPackages/getAllTourPackages', {
+                params: {
+                    page: currentPage,
+                    limit: 10 // Assuming a limit of 10 users per page
+                }
+            });
+            setPackages(response.data.packages);
+            setTotalPages(response.data.totalPages);
             setLoading(false);
         } catch (error) {
             toast.error('Failed to fetch tour packages');
             setLoading(false);
+        }
+    };
+
+    const handlePageChange = (direction) => {
+        if (direction === 'next' && currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        } else if (direction === 'prev' && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
         }
     };
 
@@ -116,13 +132,13 @@ const TourPackage = () => {
                 // If no new image is selected, append the current image URL as a string
                 formData.append('imageUrl', updateselectedImage);
             }
-    
+
             formData.append('Name', selectedPackage.Name);
             formData.append('Description', selectedPackage.Description);
             formData.append('Price', selectedPackage.Price);
             formData.append('Itinerary', selectedPackage.Itinerary);
             formData.append('NoOfDates', selectedPackage.NoOfDates);
-    
+
             await instance.put(`/tourPackages/updateTourPackage/${selectedPackage.PackageID}`, formData);
             toast.success('Tour package updated successfully');
             setShowUpdateModal(false);
@@ -131,7 +147,7 @@ const TourPackage = () => {
             toast.error('Failed to update tour package');
         }
     };
-    
+
 
     const handleDeletePackage = async () => {
         try {
@@ -187,13 +203,13 @@ const TourPackage = () => {
                     <AdminNavBar activeItem={"tourpackage"} />
                 </div>
                 <div className="w-[2px] bg-[#F69412]"></div>
-                <div className='bg-[#EFEFEF] w-full'>
+                <div className='bg-[#EFEFEF] w-full overflow-auto h-screen'>
                     <div className='bg-[#D9D9D9] flex items-center h-[8%] pl-5'>
                         <h1 className="text-2xl font-semibold">Tour Package Management</h1>
                     </div>
-                    <div className='h-[92%] p-4'>
+                    <div className='mb-5 p-4'>
                         <button className="btn btn-primary mb-4" onClick={handleAddClick}>Add Tour Package</button>
-                        <div className="overflow-x-auto">
+                        <div className="">
                             <table className="table w-full">
                                 <thead>
                                     <tr>
@@ -219,6 +235,23 @@ const TourPackage = () => {
                                     ))}
                                 </tbody>
                             </table>
+                            <div className="flex justify-between items-center mt-4 ">
+                                <button
+                                    className='btn'
+                                    onClick={() => handlePageChange('prev')}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </button>
+                                <span>Page {currentPage} of {totalPages}</span>
+                                <button
+                                    className='btn'
+                                    onClick={() => handlePageChange('next')}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
 

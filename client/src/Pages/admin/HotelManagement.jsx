@@ -12,20 +12,37 @@ const HotelManagement = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         fetchHotels();
-    }, []);
+    }, [currentPage]);
 
     const fetchHotels = async () => {
         try {
-            const response = await instance.get('/hotel/');
-            setHotels(response.data);
+            const response = await instance.get('/hotel/', {
+                params: {
+                    page: currentPage,
+                    limit: 10 // Assuming a limit of 10 users per page
+                }
+            });
+            setHotels(response.data.hotels);
+            setTotalPages(response.data.totalPages);
             setLoading(false);
         } catch (error) {
             toast.error('Failed to fetch hotels');
             console.log(error);
             setLoading(false);
+        }
+    };
+
+    const handlePageChange = (direction) => {
+        if (direction === 'next' && currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        } else if (direction === 'prev' && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
         }
     };
 
@@ -87,18 +104,13 @@ const HotelManagement = () => {
             errors.email = "Invalid email address";
         }
 
-        return errors;
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
 
     const handleAddHotel = async () => {
-        const errors = validateHotel(selectedHotel);
-        if (Object.keys(errors).length > 0) {
-            // Display error messages
-            Object.values(errors).forEach(error => toast.error(error));
-            return;
-        }
-
+        if (!validateHotel(selectedHotel)) return;
         try {
             await instance.post('/hotel/addHotel', selectedHotel);
             toast.success('Hotel added successfully');
@@ -111,13 +123,7 @@ const HotelManagement = () => {
     };
 
     const handleUpdateHotel = async () => {
-        const errors = validateHotel(selectedHotel);
-        if (Object.keys(errors).length > 0) {
-            // Display error messages
-            Object.values(errors).forEach(error => toast.error(error));
-            return;
-        }
-
+        if (!validateHotel(selectedHotel)) return;
         try {
             await instance.put(`/hotel/updateHotel/${selectedHotel.HotelID}`, selectedHotel);
             toast.success('Hotel updated successfully');
@@ -143,8 +149,47 @@ const HotelManagement = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setSelectedHotel({ ...selectedHotel, [name]: value });
+        let newValue = value; // Initialize the new value
+
+        // Validation rules based on input name
+        switch (name) {
+            case 'Name':
+                // Allow only alphabets and ensure maximum 15 characters
+                newValue = value.replace(/[^A-Za-z]/g, '').substring(0, 15);
+                break;
+            case 'HotType':
+                // Allow only numbers, alphabets, and spaces, ensure maximum 15 characters
+                newValue = value.replace(/[^A-Za-z0-9\s]/g, '').substring(0, 15);
+                break;
+            case 'PhoneNumber':
+                // Allow only numbers and "+", ensure maximum 15 characters
+                newValue = value.replace(/[^0-9+]/g, '').substring(0, 15);
+                break;
+            case 'HotDesc':
+                // Ensure maximum 200 characters
+                newValue = value.substring(0, 200);
+                break;
+            case 'Packages':
+                // Ensure maximum 1000 characters
+                newValue = value.substring(0, 1000);
+                break;
+            case 'Address':
+                // Ensure maximum 50 characters
+                newValue = value.substring(0, 50);
+                break;
+            case 'Email':
+                // Ensure maximum 100 characters
+                newValue = value.substring(0, 100);
+                break;
+            // Add more cases for other inputs if needed
+            default:
+                break;
+        }
+
+        // Update the selectedHotel state with the new value
+        setSelectedHotel({ ...selectedHotel, [name]: newValue });
     };
+
 
     if (loading) {
         return <div>Loading...</div>;
@@ -158,13 +203,13 @@ const HotelManagement = () => {
                     <AdminNavBar activeItem={"hotel"} />
                 </div>
                 <div className="w-[2px] bg-[#F69412]"></div>
-                <div className='bg-[#EFEFEF] w-full'>
+                <div className='bg-[#EFEFEF] w-full overflow-auto h-screen'>
                     <div className='bg-[#D9D9D9] flex items-center h-[8%]  pl-5'>
                         <h1 className="text-2xl font-semibold">Hotel Management</h1>
                     </div>
-                    <div className='h-[92%] p-4'>
+                    <div className='mb-5 p-4'>
                         <button className="btn btn-primary mb-4" onClick={handleAddClick}>Add Hotel</button>
-                        <div className="overflow-x-auto">
+                        <div className="">
                             <table className="table w-full">
                                 <thead>
                                     <tr>
@@ -191,13 +236,30 @@ const HotelManagement = () => {
                                             <td>{hotel.Address}</td>
                                             <td>{hotel.Email}</td>
                                             <td>
-                                                <button className="btn mr-3" style={{ backgroundColor: '#c79500',color:'#fff' }} onClick={() => handleUpdateClick(hotel)}>Update</button>
-                                                <button className="btn" style={{ backgroundColor: '#730000',color:'#fff' }} onClick={() => handleDeleteClick(hotel)}>Delete</button>
+                                                <button className="btn mr-3" style={{ backgroundColor: '#c79500', color: '#fff' }} onClick={() => handleUpdateClick(hotel)}>Update</button>
+                                                <button className="btn" style={{ backgroundColor: '#730000', color: '#fff' }} onClick={() => handleDeleteClick(hotel)}>Delete</button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                            <div className="flex justify-between items-center mt-4 ">
+                                <button
+                                    className='btn'
+                                    onClick={() => handlePageChange('prev')}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </button>
+                                <span>Page {currentPage} of {totalPages}</span>
+                                <button
+                                    className='btn'
+                                    onClick={() => handlePageChange('next')}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -208,32 +270,88 @@ const HotelManagement = () => {
                                 <h2 className="font-bold text-lg">Add Hotel</h2>
                                 <div className="form-control">
                                     <label className="label">Name</label>
-                                    <input type="text" name="Name" value={selectedHotel.Name} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="Name"
+                                        value={selectedHotel.Name}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.name && <p className="text-red-500">{errors.name}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Type</label>
-                                    <input type="text" name="HotType" value={selectedHotel.HotType} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="HotType"
+                                        value={selectedHotel.HotType}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.hotType && <p className="text-red-500">{errors.hotType}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Phone Number</label>
-                                    <input type="text" name="PhoneNumber" value={selectedHotel.PhoneNumber} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="PhoneNumber"
+                                        value={selectedHotel.PhoneNumber}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.phoneNumber && <p className="text-red-500">{errors.phoneNumber}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Description</label>
-                                    <input type="text" name="HotDesc" value={selectedHotel.HotDesc} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="HotDesc"
+                                        value={selectedHotel.HotDesc}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.hotDesc && <p className="text-red-500">{errors.hotDesc}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Packages</label>
-                                    <input type="text" name="Packages" value={selectedHotel.Packages} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="Packages"
+                                        value={selectedHotel.Packages}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.packages && <p className="text-red-500">{errors.packages}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Address</label>
-                                    <input type="text" name="Address" value={selectedHotel.Address} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="Address"
+                                        value={selectedHotel.Address}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.address && <p className="text-red-500">{errors.address}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Email</label>
-                                    <input type="email" name="Email" value={selectedHotel.Email} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="email"
+                                        name="Email"
+                                        value={selectedHotel.Email}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.email && <p className="text-red-500">{errors.email}</p>}
                                 </div>
+
                                 <div className="modal-action">
                                     <button className="btn btn-primary" onClick={handleAddHotel}>Save</button>
                                     <button className="btn" onClick={() => setShowAddModal(false)}>Cancel</button>
@@ -249,32 +367,88 @@ const HotelManagement = () => {
                                 <h2 className="font-bold text-lg">Update Hotel</h2>
                                 <div className="form-control">
                                     <label className="label">Name</label>
-                                    <input type="text" name="Name" value={selectedHotel.Name} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="Name"
+                                        value={selectedHotel.Name}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.name && <p className="text-red-500">{errors.name}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Type</label>
-                                    <input type="text" name="HotType" value={selectedHotel.HotType} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="HotType"
+                                        value={selectedHotel.HotType}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.hotType && <p className="text-red-500">{errors.hotType}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Phone Number</label>
-                                    <input type="text" name="PhoneNumber" value={selectedHotel.PhoneNumber} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="PhoneNumber"
+                                        value={selectedHotel.PhoneNumber}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.phoneNumber && <p className="text-red-500">{errors.phoneNumber}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Description</label>
-                                    <input type="text" name="HotDesc" value={selectedHotel.HotDesc} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="HotDesc"
+                                        value={selectedHotel.HotDesc}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.hotDesc && <p className="text-red-500">{errors.hotDesc}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Packages</label>
-                                    <input type="text" name="Packages" value={selectedHotel.Packages} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="Packages"
+                                        value={selectedHotel.Packages}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.packages && <p className="text-red-500">{errors.packages}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Address</label>
-                                    <input type="text" name="Address" value={selectedHotel.Address} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="text"
+                                        name="Address"
+                                        value={selectedHotel.Address}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.address && <p className="text-red-500">{errors.address}</p>}
                                 </div>
+
                                 <div className="form-control">
                                     <label className="label">Email</label>
-                                    <input type="email" name="Email" value={selectedHotel.Email} onChange={handleInputChange} className="input input-bordered" />
+                                    <input
+                                        type="email"
+                                        name="Email"
+                                        value={selectedHotel.Email}
+                                        onChange={handleInputChange}
+                                        className="input input-bordered"
+                                    />
+                                    {errors.email && <p className="text-red-500">{errors.email}</p>}
                                 </div>
+
                                 <div className="modal-action">
                                     <button className="btn btn-primary" onClick={handleUpdateHotel}>Save</button>
                                     <button className="btn" onClick={() => setShowUpdateModal(false)}>Cancel</button>
@@ -290,7 +464,7 @@ const HotelManagement = () => {
                                 <h2 className="font-bold text-lg">Delete Hotel</h2>
                                 <p>Are you sure you want to delete this hotel?</p>
                                 <div className="modal-action">
-                                    <button className="btn " style={{ backgroundColor: '#730000',color:'#fff' }} onClick={handleDeleteHotel}>Delete</button>
+                                    <button className="btn " style={{ backgroundColor: '#730000', color: '#fff' }} onClick={handleDeleteHotel}>Delete</button>
                                     <button className="btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
                                 </div>
                             </div>

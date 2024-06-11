@@ -468,41 +468,63 @@ router.put('/updateUser/:userID', (req, res) => {
 
 
 router.get('/', (req, res) => {
-    connection.query(`SELECT 
-                        User.*, 
-                        Customer.Country,
-                        Guide.Languages,
-                        Guide.GuiType,
-                        Guide.Qualifications,
-                        Vehicle.Type AS VehicleType,
-                        Vehicle.Make AS VehicleMake,
-                        Vehicle.Capacity AS Capacity,
-                        Vehicle.VehicleNumber,
-                        Vehicle.Description AS Description
-                    FROM 
-                        User
-                    LEFT JOIN 
-                        Customer ON User.UserID = Customer.UserID
-                    LEFT JOIN 
-                        Guide ON User.UserID = Guide.UserID
-                    LEFT JOIN 
-                        Vehicle ON Guide.VehicleID = Vehicle.VehicleID
-                    WHERE 
-                        User.Status = "Active"
-                    ORDER BY 
-                        User.UserID
-`, (err, rows) => {
+    const { role, page, limit } = req.query;
+
+    let queryString = `
+        SELECT 
+            User.*, 
+            Customer.Country,
+            Guide.Languages,
+            Guide.GuiType,
+            Guide.Qualifications,
+            Vehicle.Type AS VehicleType,
+            Vehicle.Make AS VehicleMake,
+            Vehicle.Capacity AS Capacity,
+            Vehicle.VehicleNumber,
+            Vehicle.Description AS Description
+        FROM 
+            User
+        LEFT JOIN 
+            Customer ON User.UserID = Customer.UserID
+        LEFT JOIN 
+            Guide ON User.UserID = Guide.UserID
+        LEFT JOIN 
+            Vehicle ON Guide.VehicleID = Vehicle.VehicleID
+        WHERE 
+            User.Status = "Active"
+    `;
+
+    // Add role-based filtering if the role is not "All"
+    if (role && role !== "All") {
+        queryString += ` AND User.Role = "${role}"`;
+    }
+
+    connection.query(queryString, (err, rows) => {
         if (err) {
             console.error('Error querying MySQL database:', err);
             res.status(500).send('Internal Server Error');
             return;
         }
-        rows.map((row) => {
+
+        // Calculate total number of pages
+        const totalUsers = rows.length;
+        const totalPages = Math.ceil(totalUsers / limit);
+
+        // Apply pagination
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + parseInt(limit);
+        const paginatedRows = rows.slice(startIndex, endIndex);
+
+        paginatedRows.map((row) => {
             delete row.Password;
         });
-        res.status(200).json(rows);
+
+        // Send users and total pages as response
+        res.status(200).json({ users: paginatedRows, totalPages });
     });
 });
+
+
 
 
 router.get('/getUserByID/:UserId', (req, res) => {

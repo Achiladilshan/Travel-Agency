@@ -30,14 +30,26 @@ const UserManagement = () => {
     const [editMode, setEditMode] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
+    // Filter and Pagination State
+    const [filterRole, setFilterRole] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [filterRole, currentPage]);
 
     const fetchUsers = async () => {
         try {
-            const response = await instance.get('/user/');
-            setUsers(response.data);
+            const response = await instance.get('/user/', {
+                params: {
+                    role: filterRole,
+                    page: currentPage,
+                    limit: 10 // Assuming a limit of 10 users per page
+                }
+            });
+            setUsers(response.data.users);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             toast.error('Failed to fetch users');
         }
@@ -128,7 +140,6 @@ const UserManagement = () => {
         return Object.keys(errors).length === 0;
     };
 
-
     const handleRegister = async () => {
         if (validateForm(newUser)) {
             try {
@@ -150,7 +161,14 @@ const UserManagement = () => {
                 setShowModal(false);
                 fetchUsers();
             } catch (error) {
-                toast.error('Failed to register/update user');
+                if (error.response && error.response.status === 400) {
+                    const { errors } = error.response.data;
+                    Object.keys(errors).forEach((key) => {
+                        toast.error(errors[key]);
+                    });
+                } else {
+                    toast.error('Failed to register/update user');
+                }
             }
         }
     };
@@ -176,8 +194,6 @@ const UserManagement = () => {
             Email: /^.{1,100}$/,
         };
 
-
-
         const valid = validations[name] ? validations[name].test(value) : true;
 
         if (valid || value === '') {
@@ -191,8 +207,6 @@ const UserManagement = () => {
             }));
         }
     };
-
-
 
     const handleEdit = (user) => {
         resetForm();
@@ -223,25 +237,51 @@ const UserManagement = () => {
         setErrors({});
     };
 
+    const handleFilterChange = (e) => {
+        setFilterRole(e.target.value);
+    };
+
+    const handlePageChange = (direction) => {
+        if (direction === 'next' && currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        } else if (direction === 'prev' && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
     return (
         <>
             <ToastContainer />
-            <div className='flex flex-row'>
+            <div className='flex flex-row h-screen overflow-hidden'>
                 <div className="w-[25%]">
                     <AdminNavBar activeItem={"user"} />
                 </div>
                 <div className="w-[2px] bg-[#F69412]"></div>
-                <div className='bg-[#EFEFEF] w-full'>
+                <div className='bg-[#EFEFEF] w-full overflow-auto h-screen'>
                     <div className='bg-[#D9D9D9] flex items-center h-[8%]  pl-5'>
                         <h1 className="text-2xl font-semibold">User Management</h1>
                     </div>
-                    <div className='h-[92%] p-4'>
-                        <button
-                            className='btn btn-primary mb-4'
-                            onClick={() => { resetForm(); setShowModal(true); }}
-                        >
-                            Add User
-                        </button>
+                    <div className='mb-5 p-4'>
+                        <div className="flex justify-between items-center mb-4">
+                            <button
+                                className='btn btn-primary'
+                                onClick={() => { resetForm(); setShowModal(true); }}
+                            >
+                                Add User
+                            </button>
+                            <select
+                                name="filterRole"
+                                value={filterRole}
+                                onChange={handleFilterChange}
+                                className="select select-bordered"
+                            >
+                                <option value=''>All Roles</option>
+                                <option value='Customer'>Customer</option>
+                                <option value='Admin'>Admin</option>
+                                <option value='Guide'>Guide</option>
+                                <option value='Staff'>Staff</option>
+                            </select>
+                        </div>
                         <table className='table w-full'>
                             <thead>
                                 <tr>
@@ -255,22 +295,45 @@ const UserManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map(user => (
-                                    <tr key={user.UserID}>
-                                        <td>{user.UserID}</td>
-                                        <td>{user.FirstName}</td>
-                                        <td>{user.LastName}</td>
-                                        <td>{user.Email}</td>
-                                        <td>{user.PhoneNumber}</td>
-                                        <td>{user.Role}</td>
-                                        <td>
-                                            <button className='btn mr-3' style={{ backgroundColor: '#c79500', color: '#fff' }} onClick={() => handleEdit(user)}> Edit </button>
-                                            <button className='btn' style={{ backgroundColor: '#730000', color: '#fff' }} onClick={() => handleDelete(user.UserID)}>Delete</button>
-                                        </td>
+                                {users ? (
+                                    users.map(user => (
+                                        <tr key={user.UserID}>
+                                            <td>{user.UserID}</td>
+                                            <td>{user.FirstName}</td>
+                                            <td>{user.LastName}</td>
+                                            <td>{user.Email}</td>
+                                            <td>{user.PhoneNumber}</td>
+                                            <td>{user.Role}</td>
+                                            <td>
+                                                <button className='btn mr-3' style={{ backgroundColor: '#c79500', color: '#fff' }} onClick={() => handleEdit(user)}> Edit </button>
+                                                <button className='btn' style={{ backgroundColor: '#730000', color: '#fff' }} onClick={() => handleDelete(user.UserID)}>Delete</button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7">Loading...</td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
+                        <div className="flex justify-between items-center mt-4 ">
+                            <button
+                                className='btn'
+                                onClick={() => handlePageChange('prev')}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </button>
+                            <span>Page {currentPage} of {totalPages}</span>
+                            <button
+                                className='btn'
+                                onClick={() => handlePageChange('next')}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -397,7 +460,7 @@ const UserManagement = () => {
 
                                     <label className="label mt-4">Vehicle Type</label>
                                     <select
-                                        name="Type"
+                                        name="VehicleType"
                                         value={newUser.VehicleType || ""}
                                         onChange={handleChange}
                                         className="select select-bordered w-full"
@@ -463,3 +526,4 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+
