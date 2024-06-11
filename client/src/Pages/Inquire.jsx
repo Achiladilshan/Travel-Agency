@@ -15,8 +15,6 @@ const Inquire = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [pw, setPw] = useState('');
-  const [arrivalDate, setArrivalDate] = useState(null);
-  const [departureDate, setDepartureDate] = useState(null);
   const [oldForm, setOldForm] = useState({
     firstName: '',
     lastName: '',
@@ -59,15 +57,13 @@ const Inquire = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      // setOldForm(values);
+      console.log("Pressed");
       const res = await instance.post('/inquiry/addInquiry', values);
       if (res.data === 'Customer does not exist') {
         setShowModal(true);
         setOldForm(values);
         toast.info('New User Registration!')
       } else {
-        // Redirect or show success message
-        // navigate('/success'); // Adjust the route as needed
         toast.success('User Inquiry Added');
         navigate('/login');
       }
@@ -78,25 +74,23 @@ const Inquire = () => {
     setSubmitting(false);
   };
 
-  const handlePwsSubmit = async (e, formikProps) => {
+
+  const handlePwsSubmit = async (e) => {
+
     e.preventDefault();
-    // Handle the password submission logic here
-    console.log('Password:', pw);
     const data = {
       ...oldForm,
       password: pw
-    };
-  
+    }
+    setOldForm(data);
     try {
       const res = await instance.post('/inquiry/addInquiryNewUser', data);
-      toast.success('User Register Successfully and Inquiry Added!');
-      // Manually trigger Formik's submit handler after password submission
-      formikProps.handleSubmit();
+      toast.success('User Registered Successfully and Inquiry Added!');
+
     } catch (err) {
       console.log(err);
       toast.error('Failed to add User and Inquiry');
     }
-  
     setShowModal(false);
   };
   
@@ -104,6 +98,7 @@ const Inquire = () => {
   return (
     <>
       <ToastContainer />
+
       <Navbar buttonState={'LOGIN'} buttonLoc={'/login'} />
       <img src={BgImage} alt="Background" className="absolute inset-0 w-full h-full z-0" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: '-1', position: 'fixed' }} />
       <div className="max-w-md mx-auto my-8 p-6 rounded-md border-2 border-customYellow">
@@ -138,21 +133,13 @@ const Inquire = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block mb-1">Arrival Date:</label>
-                  <DatePicker
-                    selected={arrivalDate}
-                    onChange={date => setArrivalDate(date)}
-                    minDate={new Date()}
-                    className="border-black bg-white border w-full p-2 rounded-md"
-                  />
+                  <Field type="date" name="arrivalDate" className="border-black bg-white border w-full p-2 rounded-md" />
+                  <ErrorMessage name="arrivalDate" component="div" className="text-red-600" />
                 </div>
                 <div className="mb-4">
                   <label className="block mb-1">Departure Date:</label>
-                  <DatePicker
-                    selected={departureDate}
-                    onChange={date => setDepartureDate(date)}
-                    minDate={arrivalDate ? new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000)) : null}
-                    className="border-black bg-white border w-full p-2 rounded-md"
-                  />
+                  <Field type="date" name="departureDate" className="border-black bg-white border w-full p-2 rounded-md" />
+                  <ErrorMessage name="departureDate" component="div" className="text-red-600" />
                 </div>
                 <div className="mb-4">
                   <label className="block mb-1">Country:</label>
@@ -184,26 +171,23 @@ const Inquire = () => {
             <div className="modal modal-open">
               <div className="modal-box">
                 <h3 className="font-bold text-lg">Enter Your Password</h3>
-
                 <form onSubmit={handlePwsSubmit}>
                   <label className="input input-bordered flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70">
                       <path fillRule="evenodd" d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z" clipRule="evenodd" />
                     </svg>
-                    <input type="password" className="grow" onChange={e => { setPw(e.target.value) }} placeholder="Enter your password" />
+                    <input type="password" className="grow" onChange={e => setPw(e.target.value)} placeholder="Enter your password" />
                   </label>
                   <div className="modal-action">
                     <button type='submit' className="btn btn-primary">Submit</button>
                   </div>
                 </form>
-
               </div>
             </div>
           )}
         </div>
       </div>
     </>
-
   );
 }
 

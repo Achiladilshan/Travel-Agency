@@ -21,7 +21,7 @@ const TourCard = ({ name, description, price, itinerary, days, imageSrc, buttonT
       </div>
       {modalOpen && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex items-center justify-center z-[9999]">
-          <div className="bg-white p-8 rounded-lg w-[35%] ">
+          <div className="bg-white p-8 rounded-lg w-[35%] h-[85%] overflow-auto">
             <img className="w-full h-32 sm:h-48 md:h-56 lg:h-64 object-cover mb-4" src={imageSrc} alt={`Tour ${days} days`} />
             <h2 className="text-lg font-semibold">{name}</h2>
             <div className="mt-4">
