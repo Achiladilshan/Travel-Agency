@@ -63,7 +63,7 @@ router.post('/registerCustomer', (req, res) => {
                             res.status(500).send('Internal Server Error');
                             return;
                         }
-                        const currentURL = req.protocol + '://' + req.get('host') + req.originalUrl;
+                        const currentURL = 'http://localhost:3000';
                         const loginURL = currentURL + '/login';
                         sendmail(Email, "Welcome to SWEN Tours & Travels", `You have been registered as a Customer. \nPlease login to your account to view your profile and update your details.\n\n${loginURL}`);
                         res.status(201).json({ message: 'Customer registered successfully' });
@@ -155,7 +155,9 @@ router.post('/registerGuide', (req, res) => {
                                             res.status(500).send('Internal Server Error');
                                             return;
                                         }
-                                        sendmail(Email, "Welcome to Travel Management System", "You have been registered as a guide in Travel Management System. Please login to your account to view your profile and update your details.");
+                                        const currentURL = 'http://localhost:3000';
+                                        const loginURL = currentURL + '/login';
+                                        sendmail(Email, "Welcome to SWEN Tours & Travels", `You have been registered as a Guide. \nPlease login to your account to view your profile and update your details.\n\n${loginURL}`);
                                         res.status(201).json({ message: 'Guide registered successfully' });
                                     });
                             });
@@ -168,7 +170,7 @@ router.post('/registerGuide', (req, res) => {
 
 router.post('/registerStaff', (req, res) => {
     const { Password, FirstName, LastName, Email, PhoneNumber, Role } = req.body;
-    if (Role != "Staff" ) {
+    if (Role != "Staff") {
         res.status(400).send('Role Error');
         return;
     }
@@ -269,6 +271,201 @@ router.post('/registerAdmin', (req, res) => {
     });
 });
 
+router.put('/updateUser/:userID', (req, res) => {
+    const { userID } = req.params;
+    const { FirstName, LastName, Email, PhoneNumber, Role, Languages, GuiType, Qualifications, VehicleType, VehicleMake, Capacity, VehicleNumber, Description } = req.body;
+
+    // Function to update user, guide, and vehicle details
+    const updateUserDetails = () => {
+        let userUpdateFields = [];
+        let userUpdateValues = [];
+
+        if (FirstName) {
+            userUpdateFields.push('FirstName = ?');
+            userUpdateValues.push(FirstName);
+        }
+        if (LastName) {
+            userUpdateFields.push('LastName = ?');
+            userUpdateValues.push(LastName);
+        }
+        if (Email) {
+            userUpdateFields.push('Email = ?');
+            userUpdateValues.push(Email);
+        }
+        if (PhoneNumber) {
+            userUpdateFields.push('PhoneNumber = ?');
+            userUpdateValues.push(PhoneNumber);
+        }
+        if (Role) {
+            userUpdateFields.push('Role = ?');
+            userUpdateValues.push(Role);
+        }
+
+        if (userUpdateFields.length > 0) {
+            userUpdateValues.push(userID);
+            const userUpdateQuery = `UPDATE User SET ${userUpdateFields.join(', ')} WHERE UserID = ?`;
+
+            connection.query(userUpdateQuery, userUpdateValues, (err, userResult) => {
+                if (err) {
+                    console.error('Error updating User table:', err);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (Role === 'Guide') {
+                    updateGuideAndVehicle();
+                } else {
+                    res.status(200).send('User updated successfully');
+                }
+            });
+        } else {
+            if (Role === 'Guide') {
+                updateGuideAndVehicle();
+            } else {
+                res.status(200).send('User updated successfully');
+            }
+        }
+    };
+
+    const updateGuideAndVehicle = () => {
+        let guideUpdateFields = [];
+        let guideUpdateValues = [];
+
+        if (Languages) {
+            guideUpdateFields.push('Languages = ?');
+            guideUpdateValues.push(Languages);
+        }
+        if (GuiType) {
+            guideUpdateFields.push('GuiType = ?');
+            guideUpdateValues.push(GuiType);
+        }
+        if (Qualifications) {
+            guideUpdateFields.push('Qualifications = ?');
+            guideUpdateValues.push(Qualifications);
+        }
+
+        guideUpdateValues.push(userID);
+
+        if (guideUpdateFields.length > 0) {
+            const guideUpdateQuery = `UPDATE Guide SET ${guideUpdateFields.join(', ')} WHERE UserID = ?`;
+
+            connection.query(guideUpdateQuery, guideUpdateValues, (err, guideResult) => {
+                if (err) {
+                    console.error('Error updating Guide table:', err);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+                updateVehicle();
+            });
+        } else {
+            updateVehicle();
+        }
+    };
+
+    const updateVehicle = () => {
+        if (VehicleType || VehicleMake || Capacity || VehicleNumber || Description) {
+            connection.query('SELECT VehicleID FROM Guide WHERE UserID = ?', [userID], (err, vehicleRows) => {
+                if (err) {
+                    console.error('Error querying Guide table for VehicleID:', err);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (vehicleRows.length === 0) {
+                    res.status(404).send('Guide not found');
+                    return;
+                }
+
+                const vehicleID = vehicleRows[0].VehicleID;
+
+                let vehicleUpdateFields = [];
+                let vehicleUpdateValues = [];
+                if (VehicleType) {
+                    vehicleUpdateFields.push('Type = ?');
+                    vehicleUpdateValues.push(VehicleType);
+                }
+                if (VehicleMake) {
+                    vehicleUpdateFields.push('Make = ?');
+                    vehicleUpdateValues.push(VehicleMake);
+                }
+                if (Capacity) {
+                    vehicleUpdateFields.push('Capacity = ?');
+                    vehicleUpdateValues.push(Capacity);
+                }
+                if (VehicleNumber) {
+                    vehicleUpdateFields.push('VehicleNumber = ?');
+                    vehicleUpdateValues.push(VehicleNumber);
+                }
+                if (Description) {
+                    vehicleUpdateFields.push('Description = ?');
+                    vehicleUpdateValues.push(Description);
+                }
+
+                vehicleUpdateValues.push(vehicleID);
+
+                const vehicleUpdateQuery = `UPDATE Vehicle SET ${vehicleUpdateFields.join(', ')} WHERE VehicleID = ?`;
+
+                connection.query(vehicleUpdateQuery, vehicleUpdateValues, (err, vehicleResult) => {
+                    if (err) {
+                        console.error('Error updating Vehicle table:', err);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+
+                    res.status(200).send('User updated successfully');
+                });
+            });
+        } else {
+            res.status(200).send('User updated successfully');
+        }
+    };
+
+    // Check if email, phone number, or vehicle number already exists
+    connection.query('SELECT * FROM User WHERE (Email = ? OR PhoneNumber = ?) AND UserID != ?', [Email, PhoneNumber, userID], (err, userRows) => {
+        if (err) {
+            console.error('Error querying MySQL database:', err);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+
+        if (userRows.length > 0) {
+            const existingUser = userRows[0];
+            let errors = {};
+
+            if (existingUser.Email === Email) {
+                errors.Email = 'Email already exists';
+            }
+
+            if (existingUser.PhoneNumber === PhoneNumber) {
+                errors.PhoneNumber = 'Phone number already exists';
+            }
+
+            res.status(400).json({ error: 'Fields already exist', errors });
+            return;
+        }
+
+        // If VehicleNumber is provided, check if it already exists in the Vehicle table
+        if (VehicleNumber) {
+            connection.query('SELECT * FROM Vehicle WHERE VehicleNumber = ? AND VehicleID != (SELECT VehicleID FROM Guide WHERE UserID = ?)', [VehicleNumber, userID], (err, vehicleRows) => {
+                if (err) {
+                    console.error('Error querying Vehicle table:', err);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (vehicleRows.length > 0) {
+                    res.status(400).json({ error: 'Vehicle number already exists' });
+                    return;
+                }
+
+                updateUserDetails();
+            });
+        } else {
+            updateUserDetails();
+        }
+    });
+});
+
 
 router.get('/', (req, res) => {
     connection.query(`SELECT 
@@ -291,7 +488,9 @@ router.get('/', (req, res) => {
                     LEFT JOIN 
                         Vehicle ON Guide.VehicleID = Vehicle.VehicleID
                     WHERE 
-                        User.Status = "Active";
+                        User.Status = "Active"
+                    ORDER BY 
+                        User.UserID
 `, (err, rows) => {
         if (err) {
             console.error('Error querying MySQL database:', err);
