@@ -248,12 +248,6 @@ const GuideDashboard = () => {
   };
 
 
-  const handleViewTours = () => {
-    navigate('/guide/tours')
-  }
-
-
-
   const handleavailabilityclose = () => {
     setAvailability({
       startDate: new Date(),
@@ -430,16 +424,6 @@ const GuideDashboard = () => {
                     >
                       Update
                     </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card w-96 bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h2 className="card-title">Manage Your Tours</h2>
-                  <p>Click Here to Manage your Tours and Map Distance..</p>
-                  <div className="card-actions justify-end">
-                    <button className="btn btn-primary" onClick={handleViewTours}>View</button>
                   </div>
                 </div>
               </div>

@@ -585,7 +585,7 @@ const CurrentTrips = () => {
                             />
                         </div>
                         <div>
-                            <p>Total Distance: {totalDistance.toFixed(2)} km</p>
+                            <p>Total Distance: {totalDistance !== null ? totalDistance.toFixed(2) + ' km' : 'N/A'}</p>
                         </div>
                         <div className="p-4 overflow-auto max-h-[80vh]">
                             {currentTab === 'dailyDistance' && (
