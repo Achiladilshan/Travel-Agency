@@ -3,6 +3,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import instance from '../../api';
 import AdminNavBar from '../../Components/admin/Navbar';
+import CountryDropdown from '../../Components/admin/CountryDropdown';
 import Swal from 'sweetalert2';
 import { TextField } from '@mui/material';
 
@@ -34,25 +35,53 @@ const UserManagement = () => {
     const [filterRole, setFilterRole] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [itemsPerPage, setitemsPerPage] = useState(10);
 
     useEffect(() => {
         fetchUsers();
-    }, [filterRole, currentPage]);
+    }, [filterRole]);
 
     const fetchUsers = async () => {
         try {
             const response = await instance.get('/user/', {
                 params: {
                     role: filterRole,
-                    page: currentPage,
-                    limit: 10 // Assuming a limit of 10 users per page
                 }
             });
-            setUsers(response.data.users);
-            setTotalPages(response.data.totalPages);
+            console.log(response.data.rows);
+            setUsers(response.data.rows);
         } catch (error) {
             toast.error('Failed to fetch users');
         }
+    };
+
+    useEffect(() => {
+        filterUsers();
+    }, [searchQuery, users]);
+
+    const filterUsers = () => {
+        const filtered = users.filter(user =>
+            user.Email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.PhoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.FirstName.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+        setFilteredUsers(filtered);
+    };
+
+    const handlePageChange = (direction) => {
+        if (direction === 'next' && currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        } else if (direction === 'prev' && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleSearchInputChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1); // Reset page to 1 when searching
     };
 
     const handleDelete = async (UserId) => {
@@ -179,12 +208,10 @@ const UserManagement = () => {
         if (name === 'VehicleNumber') {
             value = value.toUpperCase();
         }
-
         const validations = {
             FirstName: /^[a-zA-Z]{1,15}$/,
             LastName: /^[a-zA-Z]{1,15}$/,
             PhoneNumber: /^[\d+]{1,15}$/,
-            Country: /^[a-zA-Z]{1,15}$/,
             Languages: /^[a-zA-Z,]{1,50}$/,
             Qualifications: /^[a-zA-Z,]{1,100}$/,
             Capacity: /^(?:[1-9]|\d{2})$/,
@@ -241,13 +268,9 @@ const UserManagement = () => {
         setFilterRole(e.target.value);
     };
 
-    const handlePageChange = (direction) => {
-        if (direction === 'next' && currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        } else if (direction === 'prev' && currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentusers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem)
 
     return (
         <>
@@ -282,6 +305,16 @@ const UserManagement = () => {
                                 <option value='Staff'>Staff</option>
                             </select>
                         </div>
+                        <div className="flex mb-4">
+                            <input
+                                type="text"
+                                placeholder="Search by Name,Email or Phone Number"
+                                value={searchQuery}
+                                onChange={handleSearchInputChange}
+                                className="input input-bordered mr-2 w-[17%]"
+                            />
+                            <button className="btn" onClick={() => setSearchQuery('')}>Clear</button>
+                        </div>
                         <table className='table w-full'>
                             <thead>
                                 <tr>
@@ -296,7 +329,7 @@ const UserManagement = () => {
                             </thead>
                             <tbody>
                                 {users ? (
-                                    users.map(user => (
+                                    currentusers.map(user => (
                                         <tr key={user.UserID}>
                                             <td>{user.UserID}</td>
                                             <td>{user.FirstName}</td>
@@ -413,13 +446,10 @@ const UserManagement = () => {
 
                             {newUser.Role === 'Customer' && (
                                 <>
-                                    <input
-                                        type='text'
-                                        name='Country'
+                                    <CountryDropdown
+                                        name="Country"
                                         value={newUser.Country}
                                         onChange={handleChange}
-                                        placeholder='Country'
-                                        className='input input-bordered w-full mt-4'
                                     />
                                     {errors.Country && <p className="text-red-500">{errors.Country}</p>}
                                 </>

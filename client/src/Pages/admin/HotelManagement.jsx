@@ -15,21 +15,18 @@ const HotelManagement = () => {
     const [errors, setErrors] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredHotels, setFilteredHotels] = useState([]);
+    const [itemsPerPage, setitemsPerPage] = useState(10);
 
     useEffect(() => {
         fetchHotels();
-    }, [currentPage]);
+    }, []);
 
     const fetchHotels = async () => {
         try {
-            const response = await instance.get('/hotel/', {
-                params: {
-                    page: currentPage,
-                    limit: 10 // Assuming a limit of 10 users per page
-                }
-            });
+            const response = await instance.get('/hotel/');
             setHotels(response.data.hotels);
-            setTotalPages(response.data.totalPages);
             setLoading(false);
         } catch (error) {
             toast.error('Failed to fetch hotels');
@@ -38,12 +35,30 @@ const HotelManagement = () => {
         }
     };
 
+    useEffect(() => {
+        filterHotels();
+    }, [searchQuery, hotels]);
+
+    const filterHotels = () => {
+        const filtered = hotels.filter(hotel =>
+            hotel.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            hotel.Address.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+        setFilteredHotels(filtered);
+    };
+
     const handlePageChange = (direction) => {
         if (direction === 'next' && currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
         } else if (direction === 'prev' && currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
+    };
+
+    const handleSearchInputChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1); // Reset page to 1 when searching
     };
 
     const handleAddClick = () => {
@@ -115,7 +130,7 @@ const HotelManagement = () => {
             await instance.post('/hotel/addHotel', selectedHotel);
             toast.success('Hotel added successfully');
             setShowAddModal(false);
-            fetchHotels();
+            window.location.reload();
         } catch (error) {
             toast.error('Failed to add hotel');
             console.log(error);
@@ -128,7 +143,7 @@ const HotelManagement = () => {
             await instance.put(`/hotel/updateHotel/${selectedHotel.HotelID}`, selectedHotel);
             toast.success('Hotel updated successfully');
             setShowUpdateModal(false);
-            fetchHotels();
+            window.location.reload();
         } catch (error) {
             toast.error('Failed to update hotel');
         }
@@ -141,7 +156,7 @@ const HotelManagement = () => {
             await instance.delete(`/hotel/deleteHotel/${selectedHotel.HotelID}`);
             toast.success('Hotel deleted successfully');
             setShowDeleteModal(false);
-            fetchHotels();
+            window.location.reload();
         } catch (error) {
             toast.error('Failed to delete hotel');
         }
@@ -155,7 +170,7 @@ const HotelManagement = () => {
         switch (name) {
             case 'Name':
                 // Allow only alphabets and ensure maximum 15 characters
-                newValue = value.replace(/[^A-Za-z]/g, '').substring(0, 15);
+                newValue = value.replace(/[^A-Za-z\s]/g, '').substring(0, 15);
                 break;
             case 'HotType':
                 // Allow only numbers, alphabets, and spaces, ensure maximum 15 characters
@@ -195,6 +210,11 @@ const HotelManagement = () => {
         return <div>Loading...</div>;
     }
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currenthotels = filteredHotels.slice(indexOfFirstItem, indexOfLastItem)
+
+
     return (
         <>
             <ToastContainer />
@@ -209,6 +229,16 @@ const HotelManagement = () => {
                     </div>
                     <div className='mb-5 p-4'>
                         <button className="btn btn-primary mb-4" onClick={handleAddClick}>Add Hotel</button>
+                        <div className="flex mb-4">
+                            <input
+                                type="text"
+                                placeholder="Search by name or address"
+                                value={searchQuery}
+                                onChange={handleSearchInputChange}
+                                className="input input-bordered mr-2 w-[17%]"
+                            />
+                            <button className="btn" onClick={() => setSearchQuery('')}>Clear</button>
+                        </div>
                         <div className="">
                             <table className="table w-full">
                                 <thead>
@@ -225,7 +255,7 @@ const HotelManagement = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {hotels.map(hotel => (
+                                    {currenthotels.map(hotel => (
                                         <tr key={hotel.HotelID}>
                                             <td>{hotel.HotelID}</td>
                                             <td>{hotel.Name}</td>

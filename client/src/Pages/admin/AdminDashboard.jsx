@@ -40,7 +40,7 @@ const AdminDashboard = () => {
 
     const fetchTourData = async () => {
         try {
-            const response = await instance.get('/tourPackages/getAllTourPackages');
+            const response = await instance.get('/tourPackages/getAll');
             setTourData(response.data || []);
         } catch (error) {
             console.error('Failed to fetch tour data', error);
