@@ -11,7 +11,7 @@ const Tours = () => {
   useEffect(() => {
     const fetchTourPackages = async () => {
       try {
-        const response = await instance.get('/tourPackages/getAllTourPackages');
+        const response = await instance.get('/tourPackages/getAll');
         setTourPackages(response.data);
       } catch (error) {
         console.log(error);

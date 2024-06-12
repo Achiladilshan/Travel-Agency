@@ -3,11 +3,12 @@ import Logout from '../../Assets/icons/logout.png';
 import Profile from '../../Assets/icons/profile.png';
 import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import PersonIcon from '@mui/icons-material/Person';
-import ModeOfTravelIcon from '@mui/icons-material/ModeOfTravel';
-import PaidIcon from '@mui/icons-material/Paid';
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import RateReviewIcon from '@mui/icons-material/RateReview';
+import ChatIcon from '@mui/icons-material/Chat';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import TripOriginIcon from '@mui/icons-material/TripOrigin';
+import HotelIcon from '@mui/icons-material/Hotel';
+import PersonPinIcon from '@mui/icons-material/PersonPin';
+import HistoryIcon from '@mui/icons-material/History';
 import { jwtDecode } from 'jwt-decode';
 
 const StaffSideBar = ({ activeItem }) => {
@@ -23,7 +24,7 @@ const StaffSideBar = ({ activeItem }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("activeLink");
     }
-    const targetLink = link === 'logout' ? 'login' : link === 'dashboard' ? 'admin-dashboard' : `admin/${link}`;
+    const targetLink = link === 'logout' ? 'login' : link === 'dashboard' ? 'staff-dashboard' : `staff/${link}`;
     navigate(targetLink === 'login' ? '/login' : `/${targetLink}`);
   };
 
@@ -57,51 +58,55 @@ const StaffSideBar = ({ activeItem }) => {
               <h1 className='font-semibold'>Hi,</h1>
               <h1 className=" font-bold text-xl">{userName}</h1>
             </div>
-
           </div>
-
         </div>
-        <div className="flex flex-col  items-center">
+        <div className="flex flex-col items-center">
+          
 
-          <div className={`border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "dashboard" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('dashboard')} className='flex items-center w-full'>
-              <div className='p-3'><DashboardIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Dashboard</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "chat" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('chat')} className='flex items-center w-full'>
+              <div className='p-3'><ChatIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Chat</h1>
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "user" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('user')} className='flex items-center w-full'>
-            <div className='p-3'><PersonIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>User Management</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "addtour" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('addtour')} className='flex items-center w-full'>
+              <div className='p-3'><AddBoxIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Add Tour</h1>
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "tourpackage" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('tourpackage')} className='flex items-center w-full'>
-            <div className='p-3'><ModeOfTravelIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Tour Package</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "ongoingtrip" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('ongoingtrip')} className='flex items-center w-full'>
+              <div className='p-3'><TripOriginIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Ongoing Trip</h1>
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "hotel" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('hotel')} className='flex items-center w-full'>
-            <div className='p-3'><HomeWorkIcon /></div>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "previousTrip" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('previousTrip')} className='flex items-center w-full'>
+              <div className='p-3'><HistoryIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Previous Trips</h1>
+            </button>
+          </div>
+
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "hotels" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('hotels')} className='flex items-center w-full'>
+              <div className='p-3'><HotelIcon /></div>
               <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Hotels</h1>
             </button>
           </div>
-
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "payment" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('payment')} className='flex items-center w-full'>
-            <div className='p-3'><PaidIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Payment</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "guides" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('guides')} className='flex items-center w-full'>
+              <div className='p-3'><PersonPinIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Guides</h1>
             </button>
           </div>
-
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "feedback" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('feedback')} className='flex items-center w-full'>
-            <div className='p-3'><RateReviewIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Feedback</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "Payment" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('Payment')} className='flex items-center w-full'>
+              <div className='p-3'><DashboardIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Payment</h1>
             </button>
           </div>
         </div>
@@ -112,9 +117,9 @@ const StaffSideBar = ({ activeItem }) => {
           <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px] text-white'>Logout</h1>
         </button>
       </div>
+      
     </nav>
   );
 };
 
 export default StaffSideBar;
-

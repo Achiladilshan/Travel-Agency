@@ -3,7 +3,6 @@ import imageSrc from '../Assets/16days.jpg';
 import React from 'react';
 
 const CustomTourCard = ({ buttonText, buttonLink }) => {
-  console.log(buttonLink);
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       <img className="w-full h-32 sm:h-48 md:h-56 lg:h-64 object-cover" src={imageSrc} alt="lunch" />

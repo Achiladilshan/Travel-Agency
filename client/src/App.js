@@ -28,6 +28,10 @@ import Guidecurrent from './Pages/guide/CurrentTrips';
 import Guideprevious from './Pages/guide/PreviousTrips';
 import Guidepayment from './Pages/guide/Payment';
 import Guidechat from './Pages/guide/Chat';
+import OnGoingTrip from './Pages/staff/OnGoingTrip';
+import PreviousTrips from './Pages/staff/PreviousTrips';
+import ViewHotels from './Pages/staff/ViewHotels';
+import ViewGuides from './Pages/staff/ViewGuides';
 
 
 function App() {
@@ -65,8 +69,12 @@ function App() {
         </Route>
 
         <Route element={<ProtectedStaffRoute/>}>
-        <Route path='/staff-dashboard' element={<StaffDashboard/>}/>
-        <Route path='/staff/tour' element={<TourManage/>}/>
+        <Route path='/staff-dashboard' element={<TourManage/>}/>
+        <Route path='/staff/addtour' element={<TourManage/>}/>
+        <Route path='/staff/ongoingTrip' element={<OnGoingTrip/>}/>
+        <Route path='/staff/previousTrip' element={<PreviousTrips/>}/>
+        <Route path='/staff/hotels' element={<ViewHotels/>}/>
+        <Route path='/staff/guides' element={<ViewGuides/>}/>
         </Route>
 
         <Route path="*" element={<h1>Not Found</h1>} />
