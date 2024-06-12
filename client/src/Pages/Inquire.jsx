@@ -7,9 +7,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../Components/Navbar';
 import BgImage from '../Assets/bg.png';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import CountryDropdown from '../Components/admin/CountryDropdown';
+import CustomDatePicker from '../Components/CustomDatePicker';
+import CountryDropdown from '../Components/admin/CountryList';
 
 
 const Inquire = () => {
@@ -35,8 +34,8 @@ const Inquire = () => {
     lastName: '',
     email: '',
     mobile: '',
-    arrivalDate: '',
-    departureDate: '',
+    arrivalDate: null,
+    departureDate: null,
     numAdults: '',
     numChildren: '',
     country: '',
@@ -44,21 +43,38 @@ const Inquire = () => {
   };
 
   const validationSchema = Yup.object({
-    firstName: Yup.string().required('First Name is required'),
-    lastName: Yup.string().required('First Name is required'),
-    email: Yup.string().email('Invalid email format').required('Email is required'),
-    mobile: Yup.string().required('Mobile number is required'),
+    firstName: Yup.string()
+      .required('First Name is required')
+      .max(15, 'First Name must be at most 15 characters')
+      .matches(/^[A-Za-z]+$/, 'First Name must contain only alphabets'),
+    lastName: Yup.string()
+      .required('Last Name is required')
+      .max(15, 'Last Name must be at most 15 characters')
+      .matches(/^[A-Za-z]+$/, 'Last Name must contain only alphabets'),
+    email: Yup.string()
+      .email('Invalid email format')
+      .required('Email is required')
+      .max(100, 'Email must be at most 100 characters'),
+    mobile: Yup.string()
+      .required('Mobile number is required')
+      .matches(/^[0-9+]+$/, 'Mobile number must contain only numbers and "+"')
+      .max(15, 'Mobile number must be at most 15 characters'),
     arrivalDate: Yup.date().required('Arrival Date is required'),
     departureDate: Yup.date().required('Departure Date is required'),
-    numAdults: Yup.number().min(1, 'At least 1 adult is required').required('Number of Adults is required'),
-    numChildren: Yup.number().min(0, 'Number of Children cannot be negative').nullable(),
+    numAdults: Yup.number()
+      .required('Number of Adults is required')
+      .integer('Number of Adults must be an integer')
+      .max(99, 'Number of Adults cannot exceed 99'),
+    numChildren: Yup.number()
+      .nullable()
+      .integer('Number of Children must be an integer')
+      .max(99, 'Number of Children cannot exceed 99'),
     country: Yup.string().required('Country is required'),
     message: Yup.string().required('Message is required')
-  });
+  });  
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      console.log("Pressed");
       const res = await instance.post('/inquiry/addInquiry', values);
       if (res.data === 'Customer does not exist') {
         setShowModal(true);
@@ -66,7 +82,9 @@ const Inquire = () => {
         toast.info('New User Registration!')
       } else {
         toast.success('User Inquiry Added');
-        navigate('/login');
+        setTimeout(() => {
+          navigate('/login');
+      }, 1500);
       }
     } catch (err) {
       console.log(err);
@@ -134,17 +152,17 @@ const Inquire = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block mb-1">Arrival Date:</label>
-                  <Field type="date" name="arrivalDate" className="border-black bg-white border w-full p-2 rounded-md" />
+                  <Field name="arrivalDate" component={CustomDatePicker} />
                   <ErrorMessage name="arrivalDate" component="div" className="text-red-600" />
                 </div>
                 <div className="mb-4">
                   <label className="block mb-1">Departure Date:</label>
-                  <Field type="date" name="departureDate" className="border-black bg-white border w-full p-2 rounded-md" />
+                  <Field name="departureDate" component={CustomDatePicker} startDate={initialValues.arrivalDate} />
                   <ErrorMessage name="departureDate" component="div" className="text-red-600" />
                 </div>
                 <div className="mb-4">
                   <label className="block mb-1">Country:</label>
-                  <Field type="text" name="country" className="border-black bg-white border w-full p-2 rounded-md" />
+                  <Field name="country" component={CountryDropdown} />
                   <ErrorMessage name="country" component="div" className="text-red-600" />
                 </div>
                 <div className="mb-4">
@@ -171,7 +189,7 @@ const Inquire = () => {
           {showModal && (
             <div className="modal modal-open">
               <div className="modal-box">
-                <h3 className="font-bold text-lg">Enter Your Password</h3>
+                <h3 className="font-bold text-lg">Create a New Password</h3>
                 <form onSubmit={handlePwsSubmit}>
                   <label className="input input-bordered flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70">

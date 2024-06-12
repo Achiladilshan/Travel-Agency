@@ -448,7 +448,7 @@ const Login = () => {
           </div>
 
           <div className='flex justify-end font-light text-[14px] mb-4 text-white' onClick={handleClick}>
-            <p class="cursor-pointer"><u>Forgot Password?</u></p>
+            <p className="cursor-pointer"><u>Forgot Password?</u></p>
           </div>
 
           <div className="mt-4">
