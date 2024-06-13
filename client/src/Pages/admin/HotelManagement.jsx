@@ -235,7 +235,7 @@ const HotelManagement = () => {
                                 placeholder="Search by name or address"
                                 value={searchQuery}
                                 onChange={handleSearchInputChange}
-                                className="input input-bordered mr-2 w-[17%]"
+                                className="input input-bordered mr-2 w-[22%]"
                             />
                             <button className="btn" onClick={() => setSearchQuery('')}>Clear</button>
                         </div>

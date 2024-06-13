@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminNavBar from '../../Components/guide/Navbar';
 import instance from '../../api';
 import { toast } from 'react-toastify';
@@ -24,11 +24,10 @@ const CurrentTrips = () => {
     const [guideID, setGuideID] = useState('');
     const [allocatedTrips, setAllocatedTrips] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [selectedTrip, setSelectedTrip] = useState([]);
     const [showNestedModal, setShowNestedModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('dailyDistance');
     const [tripDays, setTripDays] = useState([]);
-    const [tripPrice, setTripPrice] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
     const [trackPoints, setTrackPoints] = useState([]);
     const [totalDistance, setTotalDistance] = useState(null);
@@ -265,8 +264,10 @@ const CurrentTrips = () => {
                 setGuideID(res.data[0].GuideID);
                 try {
                     const GuideID = response.data.user.id;
-                    const res = await instance.get(`/trip/guide/${GuideID}`);
-                    const pendingTrips = res.data.filter(trip => trip.Status === 'Pending');
+                    const res = await instance.get(`/trip/tripcustomer/${GuideID}`);
+                    const pendingTrips = res.data.filter(trip =>
+                        trip.Status === 'Pending' || trip.Status === 'Advanced' || trip.Status === 'Active'
+                    );
                     setAllocatedTrips(pendingTrips);
 
                 } catch (error) {
@@ -316,6 +317,8 @@ const CurrentTrips = () => {
         setShowNestedModal(!showNestedModal);
         setTrackPoints([]);
         setSelectedDay(null);
+        setUploadedFiles([]);
+        setSelectedTrip([]);
         //window.location.reload();
     }
 
@@ -494,7 +497,7 @@ const CurrentTrips = () => {
     };
 
     useEffect(() => {
-        if (selectedTrip) {
+        if (Object.keys(selectedTrip).length > 0) {
             fetchUploadedFiles();
         }
     }, [selectedTrip]);
@@ -505,25 +508,28 @@ const CurrentTrips = () => {
                 <AdminNavBar activeItem={"currenttrips"} />
             </div>
             <div className="w-[2px] bg-[#F69412]"></div>
-            <div className='bg-[#EFEFEF] w-full'>
+            <div className='bg-[#EFEFEF] w-full overflow-auto h-screen'>
                 <div className='bg-[#D9D9D9] flex items-center h-[8%]  pl-5'>
                     <h1 className="text-2xl font-semibold">Current Trips</h1>
                 </div>
-                <div className='h-[92%] p-8'>
+                <div className='mb-5 p-4'>
                     <div className='flex-col mt-10 px-5'>
                         {allocatedTrips.length === 0 ? (
-                            <div className="text-gray-500 text-lg">No pending orders found</div>
+                            <div className="text-gray-500 text-lg">No Ongoing orders found</div>
                         ) : (
                             allocatedTrips.map(trip => (
-                                <div key={trip.TripID} className="flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md">
+                                <div key={trip.TripID} className={`flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md ${trip.Status === 'Active' ? 'border-4 border-[#ff9500]' : ''}`}>
                                     <div className="flex items-center">
                                         <div className="ml-8 mr-[60px] space-y-3 w-[50%]">
                                             <div>Trip ID: {trip.TripID}</div>
-                                            <div>Customer Name: {trip.name}</div>
-                                            <div>Start Date: {formatDate(trip.StartDate)}</div>
-                                            <div>End Date: {formatDate(trip.EndDate)}</div>
-                                            <div>Adults Count: {trip.AdultsCount}</div>
-                                            <div>Children Count: {trip.ChildrenCount}</div>
+                                            <div>Customer Name: <b>{trip.FirstName} {trip.LastName}</b></div>
+                                            <div>Customer Email: <b>{trip.Email}</b> </div>
+                                            <div>Customer Phone: <b>{trip.PhoneNumber}</b></div>
+                                            <div>Customer Country: <b>{trip.Country}</b></div>
+                                            <div>Start Date: <b>{formatDate(trip.StartDate)}</b></div>
+                                            <div>End Date: <b>{formatDate(trip.EndDate)}</b></div>
+                                            <div>Adults Count: <b>{trip.AdultsCount}</b></div>
+                                            <div>Children Count: <b>{trip.ChildrenCount}</b></div>
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="flex mx-8 w-[40%] justify-center">
@@ -534,14 +540,16 @@ const CurrentTrips = () => {
                                             <div className="flex space-x-10 items-center">
                                                 <div className='inline-flex flex-col space-y-3'>
                                                     <button className="bg-[#39069e] text-white px-4 py-2 rounded-xl" onClick={() => handleModalToggle(trip)}>More Details</button>
-                                                    <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
+                                                    {trip.Status === 'Active' &&
+                                                        <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="mx-9 flex justify-center">
                                             <div className="flex items-center justify-center">
-                                                <button className="bg-[green] text-white px-4 py-2 rounded-full">{trip.Status}</button>
+                                                <button className="bg-[green] text-white px-4 py-2 rounded-full">{trip.Status === 'Pending' || trip.Status === 'Advanced' ? 'Pending' : trip.Status}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -584,12 +592,12 @@ const CurrentTrips = () => {
                                 onClick={() => handleTabClick('addBills')}
                             />
                         </div>
-                        <div>
-                            <p>Total Distance: {totalDistance !== null ? totalDistance.toFixed(2) + ' km' : 'N/A'}</p>
-                        </div>
-                        <div className="p-4 overflow-auto max-h-[80vh]">
+                        <div className="px-4 overflow-auto max-h-[80vh]">
                             {currentTab === 'dailyDistance' && (
                                 <div>
+                                    <div className='mb-5'>
+                                        <p>Total Distance: {totalDistance !== null ? totalDistance.toFixed(2) + ' km' : 'N/A'}</p>
+                                    </div>
                                     <div>
                                         <label htmlFor="date-dropdown" className="block font-semibold mb-2">Select a Date</label>
                                         <select

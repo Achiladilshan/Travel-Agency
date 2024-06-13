@@ -311,7 +311,7 @@ const UserManagement = () => {
                                 placeholder="Search by Name,Email or Phone Number"
                                 value={searchQuery}
                                 onChange={handleSearchInputChange}
-                                className="input input-bordered mr-2 w-[17%]"
+                                className="input input-bordered mr-2 w-[30%]"
                             />
                             <button className="btn" onClick={() => setSearchQuery('')}>Clear</button>
                         </div>
