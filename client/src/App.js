@@ -23,13 +23,19 @@ import ProtectedGuideRoute from './Routes/ProtectedGuideRoute';
 import ProtectedCustomertRoute from './Routes/ProtectedCustomerRoute';
 import ProtectedStaffRoute from './Routes/ProtectedStaffRoute';
 import TourManage from './Pages/staff/TourManage';
+// import ViewTours from './Components/guide/ViewTours';
 import Guidecurrent from './Pages/guide/CurrentTrips';
 import Guideprevious from './Pages/guide/PreviousTrips';
 import Guidepayment from './Pages/guide/Payment';
+// import Guidechat from './Pages/guide/Chat';
 import OnGoingTrip from './Pages/staff/OnGoingTrip';
 import PreviousTrips from './Pages/staff/PreviousTrips';
 import ViewHotels from './Pages/staff/ViewHotels';
 import ViewGuides from './Pages/staff/ViewGuides';
+import ViewInquiry from './Pages/staff/ViewInquiry';
+import GuidePayments from './Pages/staff/GuidePayment';
+import Chat from './Components/staff/Chat';
+import InquiryPage from './Pages/customer/InquiryPage';
 
 
 function App() {
@@ -47,6 +53,8 @@ function App() {
           <Route exact path="/Customer/current-trip" element={<CustomerCurrent />}/>
           <Route exact path="/Customer/previous-trip" element={<CustomerPrevious />}/>
           <Route exact path="/Customer/feedbacks" element={<CustomerFeedback />}/>
+          
+          <Route exact path="/Customer/inquiry" element={<InquiryPage />}/>
         </Route>
         <Route element={<ProtectedAdminRoute/>}>
           <Route path="/admin-dashboard" element={<AdminDashboard/>} />
@@ -59,18 +67,23 @@ function App() {
         
         <Route element={<ProtectedGuideRoute/>}>
         <Route path='/guide-dashboard' element={<GuideDashboard/>}/>
+        {/* <Route path='/guide/tours' element={<ViewTours/>}/> */}
         <Route path='/guide/currenttrips' element={<Guidecurrent/>}/>
         <Route path='/guide/previoustrips' element={<Guideprevious/>}/>
+        {/* <Route path='/guide/chat' element={<Guidechat/>}/> */}
         <Route path='/guide/payment' element={<Guidepayment/>}/>
         </Route>
 
         <Route element={<ProtectedStaffRoute/>}>
-        <Route path='/staff-dashboard' element={<TourManage/>}/>
+        <Route path='/staff-dashboard' element={<ViewInquiry/>}/>
         <Route path='/staff/addtour' element={<TourManage/>}/>
         <Route path='/staff/ongoingTrip' element={<OnGoingTrip/>}/>
         <Route path='/staff/previousTrip' element={<PreviousTrips/>}/>
         <Route path='/staff/hotels' element={<ViewHotels/>}/>
         <Route path='/staff/guides' element={<ViewGuides/>}/>
+        <Route path='/staff/guidepayment' element={<GuidePayments/>}/>
+        {/* <Route path='/staff/inquiry' element={<ViewInquiry/>}/> */}
+        {/* <Route path='/staff/chat/:inquiryID' element={</>}/> */}
         </Route>
 
         <Route path="*" element={<h1>Not Found</h1>} />

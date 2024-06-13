@@ -62,10 +62,10 @@ const Navbar = ({ activeItem }) => {
         </div>
         <div className="flex flex-col  items-center">
 
-          <div className={`border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "chat" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('chat')} className='flex items-center w-full'>
+          <div className={`border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "inquiry" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('inquiry')} className='flex items-center w-full'>
               <div className='p-3'><ChatIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Chat</h1>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Inquiry</h1>
             </button>
           </div>
 

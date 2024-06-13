@@ -64,14 +64,16 @@ const Inquire = () => {
     numAdults: Yup.number()
       .required('Number of Adults is required')
       .integer('Number of Adults must be an integer')
+      .min(1, 'Number of Adults must be at least 1')
       .max(99, 'Number of Adults cannot exceed 99'),
     numChildren: Yup.number()
       .nullable()
       .integer('Number of Children must be an integer')
+      .min(0, 'Number of Children must be at least 0')
       .max(99, 'Number of Children cannot exceed 99'),
     country: Yup.string().required('Country is required'),
     message: Yup.string().required('Message is required')
-  });  
+  });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -84,7 +86,7 @@ const Inquire = () => {
         toast.success('User Inquiry Added');
         setTimeout(() => {
           navigate('/login');
-      }, 1500);
+        }, 1500);
       }
     } catch (err) {
       console.log(err);
@@ -112,7 +114,7 @@ const Inquire = () => {
     }
     setShowModal(false);
   };
-  
+
 
   return (
     <>

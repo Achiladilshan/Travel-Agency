@@ -12,7 +12,7 @@ function PreviousTrips() {
 
   const fetchPreviousTrips = async () => {
     try {
-      const response = await instance.get('/trip/getPreviousTrips');
+      const response = await instance.get('/trip/get/getPreviousTrips');
       setPreviousTrips(response.data);
     } catch (error) {
       console.error('Failed to fetch previous trips:', error);
