@@ -127,7 +127,7 @@ const Chat = ({ inquiryID }) => {
               onChange={handleFileChange}
               className="file-input file-input-bordered file-input-info w-full max-w-xs ml-2"
             />
-            <button className="p-2 m-2 btn btn-active btn-primary" onClick={handleFileUpload}>
+            <button className="p-2 ml-2 btn btn-active btn-primary" onClick={handleFileUpload}>
               Upload
             </button>
           </>

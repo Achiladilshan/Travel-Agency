@@ -8,7 +8,6 @@ const Home = () => {
     <div>
         <Navbar activeItem={'HOME'} buttonState={'LOGIN'} buttonLoc={'/login'}/>
         <Homedash />
-        
     </div>
   )
 }

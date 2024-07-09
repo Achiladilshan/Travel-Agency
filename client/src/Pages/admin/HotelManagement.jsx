@@ -3,7 +3,7 @@ import AdminNavBar from '../../Components/admin/Navbar';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'daisyui/dist/full.css'; // Ensure DaisyUI is properly imported
-import instance from '../../api'; // Ensure this is the correct path to your axios instance
+import instance from '../../api'; // Import the Axios instance for API requests
 
 const HotelManagement = () => {
     const [hotels, setHotels] = useState([]);
@@ -19,10 +19,12 @@ const HotelManagement = () => {
     const [filteredHotels, setFilteredHotels] = useState([]);
     const [itemsPerPage, setitemsPerPage] = useState(10);
 
+    // Fetch hotels from the API when component mounts
     useEffect(() => {
         fetchHotels();
     }, []);
 
+    // Fetch hotels function
     const fetchHotels = async () => {
         try {
             const response = await instance.get('/hotel/');
@@ -35,19 +37,22 @@ const HotelManagement = () => {
         }
     };
 
+    // Filter hotels based on search query whenever searchQuery or hotels array changes
     useEffect(() => {
         filterHotels();
     }, [searchQuery, hotels]);
 
+    // Filter hotels based on search query
     const filterHotels = () => {
         const filtered = hotels.filter(hotel =>
             hotel.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             hotel.Address.toLowerCase().includes(searchQuery.toLowerCase())
         );
-        setTotalPages(Math.ceil(filtered.length / itemsPerPage));
-        setFilteredHotels(filtered);
+        setTotalPages(Math.ceil(filtered.length / itemsPerPage)); // Calculate total pages based on filtered hotels
+        setFilteredHotels(filtered); // Update filtered hotels state
     };
 
+    // Handle pagination - move to previous or next page
     const handlePageChange = (direction) => {
         if (direction === 'next' && currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
@@ -56,11 +61,13 @@ const HotelManagement = () => {
         }
     };
 
+    // Handle input change in search bar
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
         setCurrentPage(1); // Reset page to 1 when searching
     };
 
+    // Show add hotel modal
     const handleAddClick = () => {
         setSelectedHotel({
             Name: '',
@@ -74,16 +81,19 @@ const HotelManagement = () => {
         setShowAddModal(true);
     };
 
+    // Show update hotel modal for the selected hotel
     const handleUpdateClick = (hotel) => {
         setSelectedHotel(hotel);
         setShowUpdateModal(true);
     };
 
+    // Show delete hotel modal for the selected hotel
     const handleDeleteClick = (hotel) => {
         setSelectedHotel(hotel);
         setShowDeleteModal(true);
     };
 
+    // Validate hotel form inputs
     const validateHotel = (hotel) => {
         let errors = {};
 
@@ -119,26 +129,28 @@ const HotelManagement = () => {
             errors.email = "Invalid email address";
         }
 
-        setErrors(errors);
-        return Object.keys(errors).length === 0;
+        setErrors(errors); // Update errors state with validation errors
+        return Object.keys(errors).length === 0; // Return true if there are no validation errors
     };
 
 
+    // Handle add hotel operation
     const handleAddHotel = async () => {
-        if (!validateHotel(selectedHotel)) return;
+        if (!validateHotel(selectedHotel)) return; // Validate hotel form before proceeding
         try {
-            await instance.post('/hotel/addHotel', selectedHotel);
-            toast.success('Hotel added successfully');
-            setShowAddModal(false);
-            window.location.reload();
+            await instance.post('/hotel/addHotel', selectedHotel); // Send POST request to add hotel
+            toast.success('Hotel added successfully'); 
+            setShowAddModal(false); // Hide add hotel modal
+            window.location.reload(); // Refresh page to update hotel list
         } catch (error) {
             toast.error('Failed to add hotel');
-            console.log(error);
+            console.error(error);
         }
     };
 
+    // Handle update hotel operation
     const handleUpdateHotel = async () => {
-        if (!validateHotel(selectedHotel)) return;
+        if (!validateHotel(selectedHotel)) return; // Validate hotel form before proceeding
         try {
             await instance.put(`/hotel/updateHotel/${selectedHotel.HotelID}`, selectedHotel);
             toast.success('Hotel updated successfully');
@@ -146,11 +158,11 @@ const HotelManagement = () => {
             window.location.reload();
         } catch (error) {
             toast.error('Failed to update hotel');
+            console.error(error);
         }
     };
 
-
-
+    // Handle delete hotel operation
     const handleDeleteHotel = async () => {
         try {
             await instance.delete(`/hotel/deleteHotel/${selectedHotel.HotelID}`);
@@ -159,9 +171,11 @@ const HotelManagement = () => {
             window.location.reload();
         } catch (error) {
             toast.error('Failed to delete hotel');
+            console.error(error);
         }
     };
 
+    // Handle input change for hotel form fields
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         let newValue = value; // Initialize the new value
@@ -196,7 +210,6 @@ const HotelManagement = () => {
                 // Ensure maximum 100 characters
                 newValue = value.substring(0, 100);
                 break;
-            // Add more cases for other inputs if needed
             default:
                 break;
         }
@@ -205,11 +218,12 @@ const HotelManagement = () => {
         setSelectedHotel({ ...selectedHotel, [name]: newValue });
     };
 
-
+    // Render loading message while data is being fetched
     if (loading) {
         return <div>Loading...</div>;
     }
 
+    // Calculate indexes for current page items in pagination
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currenthotels = filteredHotels.slice(indexOfFirstItem, indexOfLastItem)
@@ -293,7 +307,7 @@ const HotelManagement = () => {
                         </div>
                     </div>
 
-                    {/* Add Modal */}
+                    {/* Add Hotel Modal */}
                     {showAddModal && (
                         <div className="modal modal-open">
                             <div className="modal-box">
@@ -390,7 +404,7 @@ const HotelManagement = () => {
                         </div>
                     )}
 
-                    {/* Update Modal */}
+                    {/* Update Hotel Modal */}
                     {showUpdateModal && (
                         <div className="modal modal-open">
                             <div className="modal-box">
@@ -487,7 +501,7 @@ const HotelManagement = () => {
                         </div>
                     )}
 
-                    {/* Delete Modal */}
+                    {/* Delete Hotel Modal */}
                     {showDeleteModal && (
                         <div className="modal modal-open">
                             <div className="modal-box">

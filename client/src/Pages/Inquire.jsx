@@ -42,6 +42,7 @@ const Inquire = () => {
     message: ''
   };
 
+  // Validation schema for form fields
   const validationSchema = Yup.object({
     firstName: Yup.string()
       .required('First Name is required')
@@ -75,6 +76,7 @@ const Inquire = () => {
     message: Yup.string().required('Message is required')
   });
 
+  // Handle form submission
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const res = await instance.post('/inquiry/addInquiry', values);
@@ -95,7 +97,7 @@ const Inquire = () => {
     setSubmitting(false);
   };
 
-
+  // Handle password submission for new user registration
   const handlePwsSubmit = async (e) => {
 
     e.preventDefault();

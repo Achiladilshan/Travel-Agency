@@ -8,6 +8,10 @@ import ModeOfTravelIcon from '@mui/icons-material/ModeOfTravel';
 import PaidIcon from '@mui/icons-material/Paid';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import LoopIcon from '@mui/icons-material/Loop';
+import HistoryIcon from '@mui/icons-material/History';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import { jwtDecode } from 'jwt-decode';
 
 const Navbar = ({ activeItem }) => {
@@ -48,7 +52,7 @@ const Navbar = ({ activeItem }) => {
   }, []);
 
   return (
-    <nav className="h-screen bg-white text-black w-50 flex flex-col justify-between items-center">
+    <nav className="h-screen overflow-y-auto bg-white text-black w-50 flex flex-col justify-between items-center">
       <div className='w-full'>
         <div className='mt-8 mb-[55px] flex px-[10%]'>
           <img src={Profile} alt="Profile" className={`w-[72px] h-[72px]`} />
@@ -57,9 +61,7 @@ const Navbar = ({ activeItem }) => {
               <h1 className='font-semibold'>Hi,</h1>
               <h1 className=" font-bold text-xl">{userName}</h1>
             </div>
-
           </div>
-
         </div>
         <div className="flex flex-col  items-center">
 
@@ -72,38 +74,67 @@ const Navbar = ({ activeItem }) => {
 
           <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "user" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
             <button onClick={handleLinkClick('user')} className='flex items-center w-full'>
-            <div className='p-3'><PersonIcon /></div>
+              <div className='p-3'><PersonIcon /></div>
               <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>User Management</h1>
+            </button>
+          </div>
+
+          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "addtour" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('addtour')} className='flex items-center w-full'>
+              <div className='p-3'><AddBoxIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Add Tour</h1>
             </button>
           </div>
 
           <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "tourpackage" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
             <button onClick={handleLinkClick('tourpackage')} className='flex items-center w-full'>
-            <div className='p-3'><ModeOfTravelIcon /></div>
+              <div className='p-3'><ModeOfTravelIcon /></div>
               <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Tour Package</h1>
             </button>
           </div>
 
           <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "hotel" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
             <button onClick={handleLinkClick('hotel')} className='flex items-center w-full'>
-            <div className='p-3'><HomeWorkIcon /></div>
+              <div className='p-3'><HomeWorkIcon /></div>
               <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Hotels</h1>
-            </button>
-          </div>
-
-          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "payment" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('payment')} className='flex items-center w-full'>
-            <div className='p-3'><PaidIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Payment</h1>
             </button>
           </div>
 
           <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "feedback" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
             <button onClick={handleLinkClick('feedback')} className='flex items-center w-full'>
-            <div className='p-3'><RateReviewIcon /></div>
+              <div className='p-3'><RateReviewIcon /></div>
               <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Feedback</h1>
             </button>
           </div>
+
+          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "ongoing-trip" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('ongoing-trip')} className='flex items-center w-full'>
+              <div className='p-3'><LoopIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Ongoing Trip</h1>
+            </button>
+          </div>
+
+          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "previous-trip" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('previous-trip')} className='flex items-center w-full'>
+              <div className='p-3'><HistoryIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Previous Trip</h1>
+            </button>
+          </div>
+
+          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "guide" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('guide')} className='flex items-center w-full'>
+              <div className='p-3'><DirectionsRunIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Guide</h1>
+            </button>
+          </div>
+
+          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "guidepayment" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('guidepayment')} className='flex items-center w-full'>
+              <div className='p-3'><PaidIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Guide Payment</h1>
+            </button>
+          </div>
+
         </div>
       </div>
       <div className={`mt-6 mb-10 bg-[#820008] w-[85%] h-[60px] flex items-center ${activeLink === "logout" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#820009e6]'} rounded-lg`}>

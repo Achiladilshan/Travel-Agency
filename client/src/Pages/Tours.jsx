@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../Components/Navbar';
-import instance from '../api';
+import instance from '../api'; // Import the Axios instance for API requests
 import TourCard from '../Components/TourCard';
 import CustomTourCard from '../Components/CustomTourCard';
 import tourImageCustom from '../Assets/16days.jpg';
@@ -8,6 +8,7 @@ import tourImageCustom from '../Assets/16days.jpg';
 const Tours = () => {
   const [tourPackages, setTourPackages] = useState([]);
 
+  // useEffect hook to fetch tour packages when component mounts
   useEffect(() => {
     const fetchTourPackages = async () => {
       try {

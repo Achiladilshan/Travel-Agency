@@ -1,25 +1,24 @@
+// Routes/FeedbackRouter.js
 const express = require('express');
-const { body } = require('express-validator');
-const FeedbackRouter = express.Router();
-const { validate, authGuard } = require('../utils/validator');
-const feedbackController = require('../Controllers/feedbackController');
+const multer = require('multer');
 
-FeedbackRouter.post('/addFeedback', 
-    authGuard, 
-    feedbackController.getCurrentUser, 
-    validate([
-        body('TripID').isInt().withMessage('TripID must be an integer'),
-        body('Rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
-        body('Comment').isString().withMessage('Comment must be a string'),
-        body('Status').isString().withMessage('Status must be a string'),
-    ]), 
-    feedbackController.addFeedback
-);
+const feedbackController = require('../Controllers/feedbackController');
+const { authGuard } = require('../utils/validator');
+
+const FeedbackRouter = express.Router();
+
+// Body-parser middleware
+FeedbackRouter.use(express.json());
+const upload = multer(); // Initialize multer
+
+// Define routes and apply middleware as needed
+FeedbackRouter.post('/addFeedback', authGuard, upload.none(), feedbackController.addFeedback);
+
 
 FeedbackRouter.get('/getAllFeedback', authGuard, feedbackController.getAllFeedback);
 
-FeedbackRouter.get('/getFeedback/:FeedbackID', authGuard, feedbackController.getFeedbackById);
+FeedbackRouter.get('/getFeedback/:TripID', authGuard, feedbackController.getFeedbackByTripId);
 
-FeedbackRouter.delete('/deleteFeedback/:FeedbackID', authGuard, feedbackController.getCurrentUser, feedbackController.deleteFeedback);
+FeedbackRouter.get('/getFeedbackByUser/:UserID', authGuard, feedbackController.getFeedbackByUserID);
 
 module.exports = FeedbackRouter;

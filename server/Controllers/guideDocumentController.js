@@ -1,22 +1,23 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { signToken } = require('../services/auth.service');
-const { authGuard } = require('../utils/validator');
 const connection = require('../Config/db');
 const fs = require('fs');
 const router = express.Router();
 
+// Function to ensure directory exists, creates if not
 const ensureDirExists = (dir) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
 };
 
+// Multer storage configuration for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const { TripID } = req.body;
 
+        // Validate TripID in request body
         if (!TripID) {
             return cb(new Error('TripID is required'), null);
         }
@@ -28,28 +29,28 @@ const storage = multer.diskStorage({
         ensureDirExists(baseDir);
         ensureDirExists(tripDir);
 
-        cb(null, tripDir);
+        cb(null, tripDir); // Set destination directory
     },
     filename: (req, file, cb) => {
         const { TripID } = req.body;
-        cb(null, TripID + Date.now() + file.originalname);
+        cb(null, TripID + Date.now() + file.originalname); // Set filename
     },
 });
-
+// Multer upload instance
 const upload = multer({ storage: storage });
 
+// Endpoint to handle file uploads
 router.post('/upload', upload.array('files'), async (req, res) => {
     try {
         const { GuideID, TripID } = req.body;
         const files = req.files;
 
+        // Validate GuideID and TripID
         if (!GuideID || !TripID) {
             return res.status(400).send('GuideID and TripID are required');
         }
 
-
-
-
+        // Map files to insert promises
         const insertPromises = files.map(async (file) => {
             const Url = `${req.protocol}://${req.get('host')}/${file.path}`;
             const document = {
@@ -62,7 +63,7 @@ router.post('/upload', upload.array('files'), async (req, res) => {
             await connection.query('INSERT INTO GuideDocument SET ?', document);
         });
 
-        await Promise.all(insertPromises);
+        await Promise.all(insertPromises); // Wait for all inserts to complete
 
         res.send('Files uploaded and data saved successfully');
     } catch (error) {
@@ -123,7 +124,7 @@ router.delete('/files/:TripID/:filename', async (req, res) => {
     });
 });
 
-
+// Endpoint to retrieve GuideID for a given UserID
 router.get('/getGuideId/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
@@ -140,6 +141,7 @@ router.get('/getGuideId/:userId', async (req, res) => {
     }
 });
 
+// Endpoint to insert daily distance data
 router.post('/daily-distances', (req, res) => {
     const { TripID, selectedDay, StartPlace, EndPlace, Distance } = req.body;
 
@@ -162,6 +164,7 @@ router.post('/daily-distances', (req, res) => {
     });
 });
 
+// Endpoint to retrieve track points for a selected day and TripID
 router.get('/track-points', (req, res) => {
     const selectedDay = req.query.selectedDay;
     const TripID = req.query.TripID;
@@ -188,13 +191,13 @@ router.get('/track-points', (req, res) => {
     });
 });
 
-
+// Delete a daily distance record by DailyDistanceID
 router.delete('/daily-distances/:id', (req, res) => {
     const dailyDistanceIndex = req.params.id;
     const selectedDay = req.body.selectedDay;
     const TripID = req.body.TripID;
     
-
+    // Adjust selectedDay to MySQL date format
     const dateObject = new Date(selectedDay);
     dateObject.setDate(dateObject.getDate() + 1);
     const formattedDate = dateObject.toISOString().slice(0, 10);
@@ -237,6 +240,7 @@ router.delete('/daily-distances/:id', (req, res) => {
     });
 });
 
+// Retrieve total distance for a given tripId
 router.get('/total-distance', (req, res) => {
     const { tripId } = req.query;
 
@@ -256,8 +260,5 @@ router.get('/total-distance', (req, res) => {
         res.json({ totalDistance });
     });
 });
-
-
-
 
 module.exports = router;

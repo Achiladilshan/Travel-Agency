@@ -4,7 +4,7 @@ import { HiOutlineLockClosed, HiOutlineUser, HiOutlineEyeOff, HiOutlineEye } fro
 import LoginImage from '../Assets/LoginImage.png';
 import Navbar from '../Components/Navbar';
 import { useNavigate } from 'react-router-dom';
-import instance from '../api';
+import instance from '../api'; // Import the Axios instance for API requests
 import Swal from 'sweetalert2';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
@@ -33,29 +33,30 @@ const Login = () => {
   const [enterotp, setenterOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
-
+  // Function to validate email format
   const validateEmail = (email) => {
-    // Regular expression for basic email validation
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
+  // Handle opening the password reset modal
   const handleClick = () => {
     setStep(1);
     setisOpen(true);
   };
 
-
+  // Handle changes in email input field
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
   };
 
+  // Handle changes in password input field
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
   };
 
+  // Handle form submission for login
   const handleSubmit = async () => {
-
     console.log('Logging in...');
 
     // Validate email and password
@@ -100,7 +101,7 @@ const Login = () => {
         console.log(resRole.data?.user?.role);
         switch (resRole.data?.user?.role) {
           case 'Customer':
-            navigate('/Customer-Dashboard');
+            navigate('/Customer/current-trip');
             break;
           case 'Guide':
             navigate('/guide-dashboard');
@@ -127,6 +128,7 @@ const Login = () => {
     }
   };
 
+  // Handle closing the password reset modal
   const handleClose = () => {
     setisOpen(false);
     setemailreset('');
@@ -138,6 +140,7 @@ const Login = () => {
     setenterOtp('');
   };
 
+  // Handle the next step in the password reset process
   const handleNext = async () => {
     if (emailreset) {
       if (validateemailreset(emailreset)) {
@@ -180,6 +183,7 @@ const Login = () => {
     }
   };
 
+  // Generate OTP for password reset
   const generateOTP = () => {
     const otpcode = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -192,6 +196,7 @@ const Login = () => {
     return { code: otpcode, expiration: expiration }; // Return the generated OTP
   };
 
+  // Handle sending OTP for password reset
   const handleSendOtp = async () => {
 
     let newPasswordError = '';
@@ -251,6 +256,7 @@ const Login = () => {
 
   };
 
+  // Handle password reset process
   const handleReset = async() => {
     if (otp.code && enterotp) {
       // Check if entered OTP matches the saved OTP
@@ -378,6 +384,7 @@ const Login = () => {
     }
   };
 
+  // Validate email reset field
   const validateemailreset = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -390,6 +397,7 @@ const Login = () => {
     }
   };
 
+  // Handle changes in email reset input field
   const handleemailresetChange = (e) => {
     const value = e.target.value;
     setemailreset(value);

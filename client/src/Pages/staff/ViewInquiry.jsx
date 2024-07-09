@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import instance from '../../api';
+import instance from '../../api'; // Import the Axios instance for API requests
 import StaffSideBar from '../../Components/staff/StaffSideBar';
 import Chat from '../../Components/staff/Chat';
+import InquiryCard from '../../Components/staff/InquiryCard';
 
 
 const ViewInquiry = () => {
   const [inquiries, setInquiries] = useState([]);
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedInquiryID, setSelectedInquiryID] = useState(null);
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
+  // Fetch inquiries when the component mounts
   useEffect(() => {
     fetchInquiries();
   }, []);
 
+  // Function to fetch inquiries from the API
   const fetchInquiries = async () => {
     try {
       const response = await instance.get('/inquiry/');
@@ -24,11 +26,19 @@ const ViewInquiry = () => {
     }
   };
 
+  // Function to handle the "Chat" button click
   const handleChatClick = (inquiryID) => {
     setSelectedInquiryID(inquiryID);
     setShowChatModal(true);
   };
 
+  // Toggle modal visibility
+  const handleModalToggle = (inquiryID) => {
+    setSelectedInquiryID(inquiryID);
+    setShowModal(!showModal);
+  };
+
+  // Function to handle the "Cancel" button click
   const handleCancelClick = async (inquiryID) => {
     try {
       await instance.put(`/inquiry/updateInquiryStatus/${inquiryID}`, { Status: 'cancel' });
@@ -57,10 +67,10 @@ const ViewInquiry = () => {
                   <th className="py-2 px-4 border-b">Inquiry Date</th>
                   <th className="py-2 px-4 border-b">Arrival Date</th>
                   <th className="py-2 px-4 border-b">Departure Date</th>
-                  <th className="py-2 px-4 border-b">Message</th>
-                  <th className="py-2 px-4 border-b">Adults Count</th>
-                  <th className="py-2 px-4 border-b">Children Count</th>
+                  <th className="py-2 px-4 border-b">Customer Name</th>
+                  <th className="py-2 px-4 border-b">Country</th>
                   <th className="py-2 px-4 border-b">Status</th>
+                  <th className="py-2 px-4 border-b">More Details</th>
                   <th className="py-2 px-4 border-b">Actions</th>
                 </tr>
               </thead>
@@ -71,23 +81,32 @@ const ViewInquiry = () => {
                     <td className="py-2 px-4 border-b">{inquiry.InquiryDate.split('T')[0]}</td>
                     <td className="py-2 px-4 border-b">{inquiry.ArrivalDate.split('T')[0]}</td>
                     <td className="py-2 px-4 border-b">{inquiry.DepartureDate.split('T')[0]}</td>
-                    <td className="py-2 px-4 border-b">{inquiry.Message}</td>
-                    <td className="py-2 px-4 border-b">{inquiry.AdultsCount}</td>
-                    <td className="py-2 px-4 border-b">{inquiry.ChildrenCount}</td>
+                    <td className="py-2 px-4 border-b">{inquiry.FirstName} {inquiry.LastName}</td>
+                    <td className="py-2 px-4 border-b">{inquiry.Country}</td>
                     <td className="py-2 px-4 border-b">{inquiry.Status}</td>
+                    <td className="py-2 px-4 border">
+                      <button
+                        onClick={() => handleModalToggle(inquiry.InquiryID)}
+                        className={`bg-purple-500 text-white px-2 py-1 rounded mr-2`}
+                      >
+                        More Details
+                      </button>
+                    </td>
                     <td className="py-2 px-4 border-b">
-                      <button
-                        onClick={() => handleChatClick(inquiry.InquiryID)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 mr-2"
-                      >
-                        Chat
-                      </button>
-                      <button
-                        onClick={() => handleCancelClick(inquiry.InquiryID)}
-                        className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                      >
-                        Cancel
-                      </button>
+                      <div className='flex'>
+                        <button
+                          onClick={() => handleChatClick(inquiry.InquiryID)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 mr-2"
+                        >
+                          Chat
+                        </button>
+                        <button
+                          onClick={() => handleCancelClick(inquiry.InquiryID)}
+                          className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -97,14 +116,27 @@ const ViewInquiry = () => {
         </div>
         {showChatModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-md p-4 w-full max-w-lg h-3/4 overflow-y-auto">
-              <button className="absolute top-4 right-4 text-red-700 text-3xl font-bold" onClick={() => setShowChatModal(false)}>
-                X
+            <div className="bg-white rounded-md p-4 w-full max-w-lg h-auto overflow-y-auto relative">
+              <button className="absolute top-4 right-4 text-[red] font-bold text-xl" onClick={() => setShowChatModal(false)}>
+                Close
               </button>
               <Chat inquiryID={selectedInquiryID} />
             </div>
           </div>
         )}
+
+        {showModal && selectedInquiryID && (
+          <div className="modal modal-open">
+            <div className="modal-box max-w-7xl h-auto">
+              <h2 className="font-bold text-lg mb-2">Inquiry Details</h2>
+              <InquiryCard inquiryID={selectedInquiryID} />
+              <div className="modal-action">
+                <button className="btn btn-secondary text-white" onClick={handleModalToggle}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

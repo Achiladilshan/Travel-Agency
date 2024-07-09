@@ -49,7 +49,7 @@ const StaffSideBar = ({ activeItem }) => {
   }, []);
 
   return (
-    <nav className="h-screen bg-white text-black w-50 flex flex-col justify-between items-center">
+    <nav className="h-screen bg-white text-black w-50 flex flex-col justify-between items-center overflow-auto">
       <div className='w-full'>
         <div className='mt-8 mb-[55px] flex px-[10%]'>
           <img src={Profile} alt="Profile" className={`w-[72px] h-[72px]`} />

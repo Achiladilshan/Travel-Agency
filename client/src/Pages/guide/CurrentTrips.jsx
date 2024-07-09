@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import AdminNavBar from '../../Components/guide/Navbar';
-import instance from '../../api';
+import instance from '../../api'; // Import the Axios instance for API requests
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Divider from '@mui/material/Divider';
 import Swal from 'sweetalert2';
 import AutocompleteInput from '../../Components/guide/AutocompleteInput';
 
+// Functional component for each tab in the interface (Daily Distance and Add Bill Tabs)
 const Tab = ({ label, isActive, onClick }) => {
     return (
         <button
@@ -18,7 +19,7 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-
+// Component to manage current trips and related functionalities
 const CurrentTrips = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [guideID, setGuideID] = useState('');
@@ -32,28 +33,28 @@ const CurrentTrips = () => {
     const [trackPoints, setTrackPoints] = useState([]);
     const [totalDistance, setTotalDistance] = useState(null);
 
+    // Fetch total distance when selectedTrip changes
     useEffect(() => {
         fetchTotalDistance();
     }, [selectedTrip]);
 
+    // Fetch total distance for selected trip
     const fetchTotalDistance = async () => {
         try {
-            const response = await fetch(`http://localhost:3001/guide/total-distance?tripId=${selectedTrip.TripID}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch total distance');
-            }
-            const data = await response.json();
+            const response = await instance.get(`/guide/total-distance?tripId=${selectedTrip.TripID}`);
+            const data = response.data;
             setTotalDistance(data.totalDistance);
         } catch (error) {
             console.error('Error fetching total distance:', error);
         }
     };
 
-
+    // Add new track point
     const handleAddTrackPoint = () => {
         setTrackPoints([...trackPoints, { id: trackPoints.length, location1: {}, location2: {}, distance: 0, submitted: false }]);
     };
 
+    // Delete a track point
     const handleDeleteTrackPoint = async (index) => {
         const point = trackPoints[index];
 
@@ -159,31 +160,29 @@ const CurrentTrips = () => {
     // Function to fetch track points data from the server
     const fetchTrackPoints = async (selectedDay) => {
         try {
-            const response = await fetch(`http://localhost:3001/guide/track-points?selectedDay=${selectedDay}&TripID=${selectedTrip.TripID}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch track points data');
-            }
-            const data = await response.json();
+            const response = await instance.get(`/guide/track-points?selectedDay=${selectedDay}&TripID=${selectedTrip.TripID}`);
+            const data = response.data;
             return data;
         } catch (error) {
             throw error;
         }
     };
 
-
-
+    // Update a track point's location or distance
     const updateTrackPoint = (id, locationKey, value) => {
         const updatedTrackPoints = trackPoints.map((point) =>
             point.id === id ? { ...point, [locationKey]: value } : point
         );
         setTrackPoints(updatedTrackPoints);
 
+        // Calculate distance and submit the track point
         const point = updatedTrackPoints.find(point => point.id === id);
         if (point.location1.formatted_address && point.location2.formatted_address) {
             calculateDistance(point.location1.formatted_address, point.location2.formatted_address, id, updatedTrackPoints);
         }
     };
 
+    // Calculate distance between two locations
     const calculateDistance = (origin, destination, id, updatedTrackPoints) => {
         const service = new window.google.maps.DistanceMatrixService();
         service.getDistanceMatrix(
@@ -207,6 +206,7 @@ const CurrentTrips = () => {
         );
     };
 
+    // Handle submission of a track point
     const handleSubmit = async (point) => {
         // Submit the track point to the server or database here
         try {
@@ -248,6 +248,7 @@ const CurrentTrips = () => {
                     return tp;
                 }
             });
+            // Update the state with the modified track points
             setTrackPoints(updatedTrackPoints);
         } catch (error) {
             console.error('Error submitting track point:', error);
@@ -256,17 +257,24 @@ const CurrentTrips = () => {
 
 
     useEffect(() => {
+        // Function to fetch current user details and allocated trips
         const fetchCurrentUser = async () => {
             try {
+                // Fetch current user details
                 const response = await instance.get('/auth/current-user');
                 setCurrentUser(response.data.user);
+
+                // Fetch GuideID for the current user
                 const res = await instance.get(`/guide/getGuideId/${response.data.user.id}`);
                 setGuideID(res.data[0].GuideID);
                 try {
+                    // Fetch allocated trips for the GuideID
                     const GuideID = response.data.user.id;
                     const res = await instance.get(`/trip/tripcustomer/${GuideID}`);
+
+                    // Filter pending, active, and start status trips
                     const pendingTrips = res.data.filter(trip =>
-                        trip.Status === 'Pending' || trip.Status === 'Advanced' || trip.Status === 'Active'
+                        trip.Status === 'Pending' || trip.Status === 'Active' || trip.Status === 'Started'
                     );
                     setAllocatedTrips(pendingTrips);
 
@@ -279,30 +287,36 @@ const CurrentTrips = () => {
                 toast.error('Failed to fetch current user');
             }
         };
+        // Initial fetch of current user and allocated trips
         fetchCurrentUser();
     }, []);
 
+    // Function to format date string to "MM/DD" format
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-CA');
     };
 
+    // Function to handle tab click and reset selected day
     const handleTabClick = (tab) => {
         setCurrentTab(tab);
-        setSelectedDay(null);
+        setSelectedDay(null); // Reset selected day when switching tabs
     };
 
+    // Function to toggle main modal for trip details
     const handleModalToggle = (trip) => {
         setSelectedTrip(trip);
         setShowModal(!showModal);
     };
 
+    // Function to toggle nested modal for daily details
     const handleNestedModalToggle = (trip) => {
         setSelectedTrip(trip);
         const startDate = new Date(trip.StartDate);
         const endDate = new Date(trip.EndDate);
         const dateArray = [];
 
+        // Generate date array between start and end date
         let currentDate = startDate;
         while (currentDate <= endDate) {
             const formattedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
@@ -310,22 +324,62 @@ const CurrentTrips = () => {
             currentDate.setDate(currentDate.getDate() + 1);
         }
         setTripDays(dateArray);
-        setShowNestedModal(!showNestedModal);
+        setShowNestedModal(!showNestedModal); // Toggle showNestedModal state
     };
 
+    // Function to handle starting a trip
+    const handleStart = async (trip) => {
+        // Show confirmation dialog using SweetAlert
+        const confirmResult = await Swal.fire({
+            icon: 'question',
+            title: 'Are you sure?',
+            text: 'Do you want to start this trip?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, start it!',
+            cancelButtonText: 'No, cancel'
+        });
+
+        // Check if user confirmed
+        if (confirmResult.isConfirmed) {
+            try {
+                // Update trip status to 'Start' using API call
+                await instance.put('/trip/updateTripStatus', { TripID: trip.TripID, Status: 'Started' });
+
+                // Show success message using SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!'
+                }).then(() => {
+                    window.location.reload(); // Reload window on confirmation
+                });
+            } catch (error) {
+                console.error('Error updating trip status:', error);
+
+                // Show error message using SweetAlert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Failed to update trip status.'
+                });
+            }
+        }
+    };
+
+
+    // Function to handle closing nested modal and reset state
     const handleclose = () => {
         setShowNestedModal(!showNestedModal);
         setTrackPoints([]);
         setSelectedDay(null);
         setUploadedFiles([]);
         setSelectedTrip([]);
-        //window.location.reload();
     }
 
     const isValidDate = (date) => {
         return date instanceof Date && !isNaN(date);
     };
 
+    // useEffect to reset trackPoints state when selectedDay changes
     useEffect(() => {
         setTrackPoints([]);
     }, [selectedDay]);
@@ -373,14 +427,11 @@ const CurrentTrips = () => {
                 >
                     Add Track Point
                 </button>
-                {/* <button disabled={!trackPoints || trackPoints.length === 0} className="btn bg-[#228713] text-white">
-                    Submit locations
-                </button> */}
-
             </div>
         );
     };
 
+    // State variables for selectedFiles and uploadedFiles
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [uploadedFiles, setUploadedFiles] = useState([]);
 
@@ -389,9 +440,11 @@ const CurrentTrips = () => {
         setSelectedFiles(Array.from(event.target.files));
     };
 
+    // Function to upload selected files
     const uploadFiles = async () => {
         if (selectedFiles && selectedFiles.length > 0) {
             try {
+                // Create FormData and append files and metadata
                 const formData = new FormData();
                 formData.append('GuideID', guideID);
                 formData.append('TripID', selectedTrip.TripID);
@@ -399,10 +452,7 @@ const CurrentTrips = () => {
                     formData.append('files', file);
                 });
 
-                for (let pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1]);
-                }
-
+                // Fetch API to upload files using FormData
                 const response = await fetch('http://localhost:3001/guide/upload', {
                     method: 'POST',
                     body: formData,
@@ -441,6 +491,7 @@ const CurrentTrips = () => {
         }
     };
 
+    // Function to fetch uploaded files for selected trip
     const fetchUploadedFiles = async () => {
         try {
             const response = await fetch(`http://localhost:3001/guide/files/${selectedTrip.TripID}`);
@@ -455,6 +506,7 @@ const CurrentTrips = () => {
         }
     };
 
+    // Function to delete a specific file
     const deleteFile = async (filename) => {
         // Show confirmation dialog using SweetAlert
         Swal.fire({
@@ -496,6 +548,7 @@ const CurrentTrips = () => {
         });
     };
 
+    // useEffect to fetch uploaded files when selectedTrip changes
     useEffect(() => {
         if (Object.keys(selectedTrip).length > 0) {
             fetchUploadedFiles();
@@ -518,7 +571,7 @@ const CurrentTrips = () => {
                             <div className="text-gray-500 text-lg">No Ongoing orders found</div>
                         ) : (
                             allocatedTrips.map(trip => (
-                                <div key={trip.TripID} className={`flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md ${trip.Status === 'Active' ? 'border-4 border-[#ff9500]' : ''}`}>
+                                <div key={trip.TripID} className={`flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md ${trip.Status === 'Start' ? 'border-4 border-[#ff9500]' : ''}`}>
                                     <div className="flex items-center">
                                         <div className="ml-8 mr-[60px] space-y-3 w-[50%]">
                                             <div>Trip ID: {trip.TripID}</div>
@@ -540,16 +593,23 @@ const CurrentTrips = () => {
                                             <div className="flex space-x-10 items-center">
                                                 <div className='inline-flex flex-col space-y-3'>
                                                     <button className="bg-[#39069e] text-white px-4 py-2 rounded-xl" onClick={() => handleModalToggle(trip)}>More Details</button>
-                                                    {trip.Status === 'Active' &&
-                                                        <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
-                                                    }
+                                                    {trip.Status === 'Active' && (
+                                                        <>
+                                                            <button className="bg-[#19b911] text-white px-4 py-2 rounded-xl" onClick={() => handleStart(trip)}>Start Trip</button>
+                                                        </>
+                                                    )}
+                                                    {trip.Status === 'Started' && (
+                                                        <>
+                                                            <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="mx-9 flex justify-center">
                                             <div className="flex items-center justify-center">
-                                                <button className="bg-[green] text-white px-4 py-2 rounded-full">{trip.Status === 'Pending' || trip.Status === 'Advanced' ? 'Pending' : trip.Status}</button>
+                                                <button className="bg-[green] text-white px-4 py-2 rounded-full" disabled>{trip.Status}</button>
                                             </div>
                                         </div>
                                     </div>

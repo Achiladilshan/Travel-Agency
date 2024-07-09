@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Logout from '../../Assets/icons/logout.png';
 import Profile from '../../Assets/icons/profile.png';
 import { useNavigate } from 'react-router-dom';
-import RateReviewIcon from '@mui/icons-material/RateReview';
 import { jwtDecode } from 'jwt-decode';
 import ChatIcon from '@mui/icons-material/Chat';
 import LoopIcon from '@mui/icons-material/Loop';
 import HistoryIcon from '@mui/icons-material/History';
-
+import PaymentIcon from '@mui/icons-material/Payment';
 
 const Navbar = ({ activeItem }) => {
   const [activeLink, setActiveLink] = useState(localStorage.getItem('activeLink') || activeItem);
@@ -56,11 +55,9 @@ const Navbar = ({ activeItem }) => {
               <h1 className='font-semibold'>Hi,</h1>
               <h1 className=" font-bold text-xl">{userName}</h1>
             </div>
-
           </div>
-
         </div>
-        <div className="flex flex-col  items-center">
+        <div className="flex flex-col items-center">
 
           <div className={`border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "inquiry" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
             <button onClick={handleLinkClick('inquiry')} className='flex items-center w-full'>
@@ -83,10 +80,10 @@ const Navbar = ({ activeItem }) => {
             </button>
           </div>
 
-          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "feedbacks" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('feedbacks')} className='flex items-center w-full'>
-              <div className='p-3'><RateReviewIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Feedbacks</h1>
+          <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "view-payment" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('view-payment')} className='flex items-center w-full'>
+              <div className='p-3'><PaymentIcon /></div>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>View Payment</h1>
             </button>
           </div>
         </div>

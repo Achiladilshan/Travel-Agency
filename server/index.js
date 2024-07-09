@@ -7,8 +7,6 @@ const cors = require('cors');
 const app = express();
 const PORT = 3001;
 
-const connection = require('./Config/db');
-
 const UserControllers = require('./Controllers/userController');
 const HotelRouter = require('./Routes/Hotel.route');
 const AuthControl = require('./Controllers/authController');
@@ -45,7 +43,6 @@ app.use((err, req, res, next) => {
 
 app.use('/packageimages', express.static(path.join(__dirname, '/PackageImages')));
 app.use('/ChatFiles', express.static(path.join(__dirname, '/ChatFiles')));
-// app.use(express.static(path.join(__dirname, '/ChatFiles')));
 app.use('/guideuploads', express.static(path.join(__dirname, '/guideuploads')));
 
 app.use('/user', UserControllers);

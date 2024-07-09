@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminNavBar from '../../Components/admin/Navbar';
-import instance from '../../api';
+import instance from '../../api'; // Import the Axios instance for API requests
 import { toast, ToastContainer } from 'react-toastify';
 import { Button } from '@mui/material';
 import 'react-toastify/dist/ReactToastify.css';
@@ -19,10 +19,12 @@ const TourPackage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
+    // Fetch packages on component mount and when currentPage changes
     useEffect(() => {
         fetchPackages();
     }, [currentPage]);
 
+    // Function to fetch tour packages from the server
     const fetchPackages = async () => {
         try {
             const response = await instance.get('/tourPackages/getAllTourPackages', {
@@ -36,10 +38,12 @@ const TourPackage = () => {
             setLoading(false);
         } catch (error) {
             toast.error('Failed to fetch tour packages');
+            console.log(error);
             setLoading(false);
         }
     };
 
+    // Function to handle page navigation
     const handlePageChange = (direction) => {
         if (direction === 'next' && currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
@@ -48,6 +52,7 @@ const TourPackage = () => {
         }
     };
 
+    // Function to handle "Add" button click
     const handleAddClick = () => {
         setSelectedPackage({
             Name: '',
@@ -61,25 +66,28 @@ const TourPackage = () => {
         setShowAddModal(true);
     };
 
+    // Function to handle image selection
     const handleImageChange = (event) => {
         const imageFile = event.target.files[0];
         setSelectedImage(imageFile);
     };
 
+    // Function to handle "Update" button click
     const handleUpdateClick = (pkg) => {
         setSelectedPackage(pkg);
-        setUpdateSelectedImage(pkg.Photo);
+        setUpdateSelectedImage(pkg.Photo); 
         setSelectedImage(null);
         setErrors({});
         setShowUpdateModal(true);
     };
 
-
+    // Function to handle "Delete" button click
     const handleDeleteClick = (pkg) => {
         setSelectedPackage(pkg);
         setShowDeleteModal(true);
     };
 
+    // Function to validate add form inputs
     const validateInputs = () => {
         let formErrors = {};
         if (!selectedPackage.Name) formErrors.Name = 'Name is required';
@@ -89,9 +97,10 @@ const TourPackage = () => {
         if (!selectedPackage.NoOfDates || selectedPackage.NoOfDates <= 0) formErrors.NoOfDates = 'No. of Days must be a positive number';
 
         setErrors(formErrors);
-        return Object.keys(formErrors).length === 0;
+        return Object.keys(formErrors).length === 0; // Return true if there are no validation errors
     };
 
+    // Function to handle adding a new package
     const handleAddPackage = async () => {
         if (!validateInputs()) return;
         try {
@@ -118,9 +127,11 @@ const TourPackage = () => {
             } else {
                 toast.error('Failed to add tour package');
             }
+            console.log(error);
         }
     };
 
+    // Function to handle updating a package
     const handleUpdatePackage = async () => {
         if (!validateInputs()) return;
         try {
@@ -145,10 +156,11 @@ const TourPackage = () => {
             fetchPackages();
         } catch (error) {
             toast.error('Failed to update tour package');
+            console.log(error);
         }
     };
 
-
+    // Function to handle deleting a package
     const handleDeletePackage = async () => {
         try {
             await instance.delete(`/tourPackages/deleteTourPackage/${selectedPackage.PackageID}`);
@@ -157,9 +169,11 @@ const TourPackage = () => {
             fetchPackages();
         } catch (error) {
             toast.error('Failed to delete tour package');
+            console.log(error);
         }
     };
 
+    // Function to handle input changes in the form fields
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         let newValue = value; // Initialize the new value
@@ -178,19 +192,15 @@ const TourPackage = () => {
                 // Allow only numbers and ensure maximum 2 digits
                 newValue = value.replace(/\D/g, '').slice(0, 2);
                 break;
-            // Add more cases for other inputs if needed
             default:
                 break;
         }
 
         // Update the selectedPackage state with the new value
         setSelectedPackage({ ...selectedPackage, [name]: newValue });
-
-        // Validate other fields if needed
-        // Replace with your validation logic for other fields, similar to your existing formErrors checks
     };
 
-
+    // Render loading message while data is being fetched
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -255,7 +265,7 @@ const TourPackage = () => {
                         </div>
                     </div>
 
-                    {/* Add Modal */}
+                    {/* Add Package Modal */}
                     {showAddModal && (
                         <div className="modal modal-open">
                             <div className="modal-box">
@@ -313,7 +323,7 @@ const TourPackage = () => {
                         </div>
                     )}
 
-                    {/* Update Modal */}
+                    {/* Update Package Modal */}
                     {showUpdateModal && (
                         <div className="modal modal-open">
                             <div className="modal-box">
@@ -378,7 +388,7 @@ const TourPackage = () => {
                         </div>
                     )}
 
-                    {/* Delete Modal */}
+                    {/* Delete Package Modal */}
                     {showDeleteModal && (
                         <div className="modal modal-open">
                             <div className="modal-box">

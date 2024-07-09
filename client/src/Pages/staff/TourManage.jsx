@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import StaffSideBar from "../../Components/staff/StaffSideBar";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import instance from "../../api";
+import instance from "../../api"; // Import the Axios instance for API requests
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import CustomDatePicker from '../../Components/CustomDatePicker';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
+// Initial values for the form fields
 const initialValues = {
   customerID: "",
   guideID: "",
@@ -19,6 +22,7 @@ const initialValues = {
   specialNotes: ""
 };
 
+// Validation schema for the form using Yup
 const validationSchema = Yup.object().shape({
   customerID: Yup.number().required("Customer ID is required"),
   guideID: Yup.number().required("Guide ID is required"),
@@ -31,20 +35,17 @@ const validationSchema = Yup.object().shape({
   specialNotes: Yup.string().required("Special notes are required")
 });
 
+// Fetch users data on component mount
 const TourManage = () => {
-  const [showModal, setShowModal] = useState(false);
   const [users, setUsers] = useState([]);
   const [tours, setTours] = useState([]);
-  const [inputData, setInputData] = useState("");
-  const [inputData1, setInputData1] = useState("");
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedGuide, setSelectedGuide] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
+      const role = "All";
       try {
-        const response = await instance.get("/user");
-        setUsers(response.data);
+        const response = await instance.get("/user?role=All");
+        setUsers(response.data?.rows);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -53,6 +54,7 @@ const TourManage = () => {
     fetchUsers();
   }, []);
 
+  // Fetch tours data on component mount
   useEffect(() => {
     const fetchTours = async () => {
       try {
@@ -66,16 +68,7 @@ const TourManage = () => {
     fetchTours();
   }, []);
 
-  const handleSearch = (e) => {
-    setInputData(e.target.value);
-    setSelectedUser(users.filter(user => user.UserID === parseInt(e.target.value, 10) && (user.Role.toLowerCase() === 'customer')));
-  };
-
-  const handleGuideSearch = (e) => {
-    setInputData1(e.target.value);
-    setSelectedGuide(users.filter(user => (user.FirstName == e.target.value || user.LastName == e.target.value) && user.Role.toLowerCase() === 'guide'));
-  }
-
+  // Handle form submission
   const handleSubmit = async (values, { setSubmitting }) => {
     const { customerID, guideID, price, startDate, endDate, adultsCount, childrenCount, description, specialNotes, totalDistance } = values;
 
@@ -94,13 +87,16 @@ const TourManage = () => {
 
       toast.success("Tour created successfully");
       setSubmitting(false);
-      setShowModal(false);
     } catch (error) {
       toast.error("Failed to create tour");
       console.error("Error creating tour:", error.message);
       setSubmitting(false);
     }
   };
+
+  // Filter users based on role
+  const customers = users.filter(user => user.Role.toLowerCase() === 'customer');
+  const guides = users.filter(user => user.Role.toLowerCase() === 'guide');
 
   return (
     <>
@@ -116,96 +112,96 @@ const TourManage = () => {
           </div>
           <div className='mb-5 p-4'>
             <div className='flex-col mt-10 px-5'>
-              {/* <button className="btn" onClick={() => setShowModal(true)}>Create Tour</button> */}
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting }) => (
+                {({ isSubmitting, setFieldValue }) => (
                   <Form>
-                    <div className={` `}>
+                    <div className="">
+                      <div className="mb-4">
+                        <label htmlFor="customerID" className="block text-sm font-medium text-gray-700">Select Customer:</label>
+                        <Autocomplete
+                          options={customers}
+                          getOptionLabel={(option) => `${option.FirstName} ${option.LastName}`}
+                          onChange={(event, value) => setFieldValue("customerID", value ? value.UserID : "")}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              variant="outlined"
+                              placeholder="Search by first or last name"
+                              fullWidth
+                            />
+                          )}
+                        />
+                        <Field type="hidden" name="customerID" />
+                        <ErrorMessage name="customerID" component="div" className="text-red-500 text-sm" />
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="guideID" className="block text-sm font-medium text-gray-700">Select Guide:</label>
+                        <Autocomplete
+                          options={guides}
+                          getOptionLabel={(option) => `${option.FirstName} ${option.LastName}`}
+                          onChange={(event, value) => setFieldValue("guideID", value ? value.UserID : "")}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              variant="outlined"
+                              placeholder="Search by first or last name"
+                              fullWidth
+                            />
+                          )}
+                        />
+                        <Field type="hidden" name="guideID" />
+                        <ErrorMessage name="guideID" component="div" className="text-red-500 text-sm" />
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price:</label>
+                        <Field type="number" name="price" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                        <ErrorMessage name="price" component="div" className="text-red-500 text-sm" />
+                      </div>
+                      <div className="mb-4 flex space-x-8">
+                        <div className="">
+                          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date:</label>
+                          <Field name="startDate" component={CustomDatePicker} />
+                          <ErrorMessage name="startDate" component="div" className="text-red-500 text-sm" />
+                        </div>
+                        <div className="">
+                          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date:</label>
+                          <Field name="endDate" component={CustomDatePicker} startDate={initialValues.startDate} />
+                          <ErrorMessage name="endDate" component="div" className="text-red-500 text-sm" />
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="adultsCount" className="block text-sm font-medium text-gray-700">Number of Adults:</label>
+                        <Field type="number" name="adultsCount" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                        <ErrorMessage name="adultsCount" component="div" className="text-red-500 text-sm" />
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="childrenCount" className="block text-sm font-medium text-gray-700">Number of Children:</label>
+                        <Field type="number" name="childrenCount" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                        <ErrorMessage name="childrenCount" component="div" className="text-red-500 text-sm" />
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description:</label>
+                        <Field as="textarea" name="description" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                        <ErrorMessage name="description" component="div" className="text-red-500 text-sm" />
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="specialNotes" className="block text-sm font-medium text-gray-700">Special Notes:</label>
+                        <Field as="textarea" name="specialNotes" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
+                        <ErrorMessage name="specialNotes" component="div" className="text-red-500 text-sm" />
+                      </div>
                       <div className="">
-                        <div className="mb-4">
-                          <label htmlFor="customerID" className="block text-sm font-medium text-gray-700">Select Customer:</label>
-                          <input type="text" name="selectCustomerID" value={inputData} onChange={handleSearch} className="mt-1 p-2 w-full border bg-white border-gray-300 rounded-md" />
-                          <Field as="select" name="customerID" className="mt-1 p-2 w-full border border-gray-300 bg-white rounded-md">
-                            <option value="">Select Customer</option>
-                            {selectedUser && selectedUser.map(user => (
-                              <option key={user.UserID} value={user.UserID}>{user.FirstName}</option>
-                            ))}
-                          </Field>
-                          <ErrorMessage name="customerID" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        <div className="mb-4">
-                          <label htmlFor="guideID" className="block text-sm font-medium text-gray-700">Select Guide:</label>
-                          <input type="text" name="selectGuideID" value={inputData1} onChange={handleGuideSearch} className="mt-1 p-2 w-full border bg-white border-gray-300 rounded-md" />
-                          <Field as="select" name="guideID" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white">
-                            <option value="">Select Guide</option>
-                            {selectedGuide && selectedGuide.map(user => (
-                              <option key={user.UserID} value={user.UserID}>{user.FirstName} {user.LastName}</option>
-                            ))}
-                          </Field>
-                          <ErrorMessage name="guideID" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        <div className="mb-4">
-                          <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price:</label>
-                          <Field type="number" name="price" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
-                          <ErrorMessage name="price" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        <div className="mb-4 flex space-x-8">
-                          <div className="">
-                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date:</label>
-                            <Field name="startDate" component={CustomDatePicker} />
-                            <ErrorMessage name="startDate" component="div" className="text-red-500 text-sm" />
-                          </div>
-                          <div className="">
-                            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date:</label>
-                            <Field name="endDate" component={CustomDatePicker} startDate={initialValues.startDate} />
-                            <ErrorMessage name="endDate" component="div" className="text-red-500 text-sm" />
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label htmlFor="adultsCount" className="block text-sm font-medium text-gray-700">Number of Adults:</label>
-                          <Field type="number" name="adultsCount" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
-                          <ErrorMessage name="adultsCount" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        <div className="mb-4">
-                          <label htmlFor="childrenCount" className="block text-sm font-medium text-gray-700">Number of Children:</label>
-                          <Field type="number" name="childrenCount" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
-                          <ErrorMessage name="childrenCount" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        <div className="mb-4">
-                          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description:</label>
-                          <Field as="textarea" name="description" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
-                          <ErrorMessage name="description" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        <div className="mb-4">
-                          <label htmlFor="specialNotes" className="block text-sm font-medium text-gray-700">Special Notes:</label>
-                          <Field as="textarea" name="specialNotes" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
-                          <ErrorMessage name="specialNotes" component="div" className="text-red-500 text-sm" />
-                        </div>
-                        {/* <div className="mb-4">
-                    <label htmlFor="totalDistance" className="block text-sm font-medium text-gray-700">Total Distance:</label>
-                    <Field type="number" name="totalDistance" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
-                    <ErrorMessage name="totalDistance" component="div" className="text-red-500 text-sm" />
-                  </div> */}
-                        {/* Submit and cancel buttons */}
-                        <div className=" ">
-                          <button type="submit" disabled={isSubmitting} className="btn btn-primary" >
-                            {isSubmitting ? "Submitting..." : "Submit"}
-                          </button>
-                          {/* <button className="btn btn-danger" onClick={() => setShowModal(false)}>
-                      Cancel
-                    </button> */}
-                        </div>
+                        <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+                          {isSubmitting ? "Submitting..." : "Submit"}
+                        </button>
                       </div>
                     </div>
                   </Form>
                 )}
               </Formik>
-              {/* Component to display tours */}
-              {/* <TourList tours={tours} /> */}
             </div>
           </div>
         </div>
@@ -234,6 +230,5 @@ const TourList = ({ tours }) => {
     </div>
   );
 };
-
 
 export default TourManage;

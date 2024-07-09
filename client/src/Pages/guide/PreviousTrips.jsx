@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import AdminNavBar from '../../Components/guide/Navbar';
-import instance from '../../api';
+import instance from '../../api'; // Import the Axios instance for API requests
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Divider from '@mui/material/Divider';
 import Swal from 'sweetalert2';
 import AutocompleteInput from '../../Components/guide/AutocompleteInput';
 
+// Functional component for each tab in the interface (Daily Distance and Add Bill Tabs)
 const Tab = ({ label, isActive, onClick }) => {
     return (
         <button
@@ -18,7 +19,7 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-
+// Component to manage previous trips and related functionalities
 const PreviousTrips = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [guideID, setGuideID] = useState('');
@@ -32,10 +33,12 @@ const PreviousTrips = () => {
     const [trackPoints, setTrackPoints] = useState([]);
     const [totalDistance, setTotalDistance] = useState(null);
 
+    // Fetch total distance when selectedTrip changes
     useEffect(() => {
         fetchTotalDistance();
     }, [selectedTrip]);
 
+    // Fetch total distance for selected trip
     const fetchTotalDistance = async () => {
         try {
             const response = await fetch(`http://localhost:3001/guide/total-distance?tripId=${selectedTrip.TripID}`);
@@ -319,7 +322,6 @@ const PreviousTrips = () => {
         setSelectedDay(null);
         setUploadedFiles([]);
         setSelectedTrip([]);
-        //window.location.reload();
     }
 
     const isValidDate = (date) => {
@@ -531,6 +533,12 @@ const PreviousTrips = () => {
                                             <div>End Date: <b>{formatDate(trip.EndDate)}</b></div>
                                             <div>Adults Count: <b>{trip.AdultsCount}</b></div>
                                             <div>Children Count: <b>{trip.ChildrenCount}</b></div>
+                                            {trip.Status === 'Close' &&
+                                                <>
+                                                    <div>Total Distance: <b>{trip.TotalDistance.toFixed(2)} km</b></div>
+                                                    <div>Guide Payment: <b>{trip.GuidePayment} LKR</b></div>
+                                                </>
+                                            }
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="flex mx-8 w-[40%] justify-center">
@@ -548,7 +556,7 @@ const PreviousTrips = () => {
                                         <Divider orientation="vertical" flexItem />
                                         <div className="mx-9 flex justify-center">
                                             <div className="flex items-center justify-center">
-                                                <button className={`px-4 py-2 rounded-2xl ${trip.Status === 'End' ? 'bg-yellow-600' : trip.Status === 'Close' ? 'bg-[green]' : 'bg-[green]'} text-white`}>
+                                                <button className={`px-4 py-2 rounded-2xl ${trip.Status === 'End' ? 'bg-yellow-600' : trip.Status === 'Close' ? 'bg-[green]' : 'bg-[green]'} text-white`} disabled>
                                                     <b>{trip.Status === 'End' ? 'Pending Payment Approval' : trip.Status === 'Close' ? 'Payment Complete' : trip.Status}</b>
                                                 </button>
 

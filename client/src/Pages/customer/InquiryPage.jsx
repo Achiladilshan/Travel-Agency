@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import instance from '../../api';
+import instance from '../../api'; // Import the Axios instance for API requests
 import Chat from '../../Components/staff/Chat';
-import { jwtDecode } from 'jwt-decode';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../../Components/customer/Navbar';
@@ -11,23 +9,31 @@ const InquiryPage = () => {
   const [inquiries, setInquiries] = useState([]);
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedInquiryID, setSelectedInquiryID] = useState(null);
-  const navigate = useNavigate();
   const [userID, setUserID] = useState(null);
 
+  // Fetch current user's ID
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      const decoded = jwtDecode(token);
-      setUserID(decoded.id);
-    }
+    const fetchData = async () => {
+      try {
+        const response = await instance.get("/auth/current-user");
+        const userID = response.data.user.id;
+        setUserID(userID);
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
+    fetchData();
   }, []);
 
+  // Fetch inquiries when userID state changes
   useEffect(() => {
     if (userID) {
       fetchInquiries();
     }
   }, [userID]);
 
+  // Function to fetch inquiries from API
   const fetchInquiries = async () => {
     try {
       const response = await instance.get(`/inquiry/getInquiryByUserID/${userID}`);
@@ -42,6 +48,7 @@ const InquiryPage = () => {
     }
   };
 
+  // Function to handle click on Chat button
   const handleChatClick = (inquiryID) => {
     setSelectedInquiryID(inquiryID);
     setShowChatModal(true);
@@ -103,11 +110,13 @@ const InquiryPage = () => {
                 </div>
               )}
             </div>
+
+            {/* Chat Modal */}
             {showChatModal && (
               <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white rounded-md p-4 w-full max-w-lg h-3/4 overflow-y-auto">
-                  <button className="absolute top-4 right-4 text-red-700 text-3xl font-bold" onClick={() => setShowChatModal(false)}>
-                    X
+                <div className="bg-white rounded-md p-4 w-full max-w-lg h-auto overflow-y-auto relative">
+                  <button className="absolute top-4 right-4 text-[red] font-bold text-xl" onClick={() => setShowChatModal(false)}>
+                    Close
                   </button>
                   <Chat inquiryID={selectedInquiryID} />
                 </div>

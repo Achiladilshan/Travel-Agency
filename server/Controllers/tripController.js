@@ -54,31 +54,34 @@ const addTrip = async (req, res) => {
 }
 
 const updateTripData = (req, res) => {
-    const { TripID, Price, StartDate, EndDate, AdultsCount, ChildrenCount, Description, SpecialNotes } = req.body;
-    const query = 'UPDATE Trip SET Price = ?, StartDate = ?, EndDate = ?, AdultsCount = ?, ChildrenCount = ?, Description = ?, SpecialNotes = ? WHERE TripID = ?';
-    connection.query(query, [Price, StartDate, EndDate, AdultsCount, ChildrenCount, Description, SpecialNotes, TripID], (err, result) => {
+    const { TripID, Price, StartDate, EndDate, AdultsCount, ChildrenCount, Description, SpecialNotes, GuideID } = req.body;
+    const query = 'UPDATE Trip SET Price = ?, StartDate = ?, EndDate = ?, AdultsCount = ?, ChildrenCount = ?, Description = ?, SpecialNotes = ?, GuideID = ? WHERE TripID = ?';
+    connection.query(query, [Price, StartDate, EndDate, AdultsCount, ChildrenCount, Description, SpecialNotes, GuideID, TripID], (err, result) => {
         if (err) {
             console.error('Error updating MySQL database:', err);
-            return;
+            return res.status(500).send('Internal Server Error');
         }
         res.send("Trip data updated successfully");
     });
+};
 
-}
-
-
-const getLastTripID = () => {
-    connection.query('SELECT * FROM Trip ORDER BY TripID DESC LIMIT 1', (err, rows) => {
-        if (err) {
-            console.error('Error querying MySQL database:', err);
-            return;
-        }
-        return rows[0].TripID;
-    });
-}
 
 const getAllTrips = (req, res) => {
-    connection.query('SELECT * FROM Trip', (err, rows) => {
+    connection.query(`SELECT 
+                        Trip.*,
+                        User.UserID,
+                        User.FirstName,
+                        User.LastName,
+                        User.Email,
+                        User.PhoneNumber,
+                        Customer.Country
+                    FROM 
+                        Trip
+                    JOIN 
+                        Customer ON Trip.CustomerID = Customer.CustomerID
+                    JOIN 
+                        User ON Customer.UserID = User.UserID`
+                    , (err, rows) => {
         if (err) {
             console.error('Error querying MySQL database:', err);
             return;
@@ -127,9 +130,9 @@ const getTripByGuideID = (req, res) => {
                 return;
             }
             res.json(rows);
-        });  
-    });  
-    
+        });
+    });
+
 }
 
 const getTripByGuideIDCustomer = (req, res) => {
@@ -180,9 +183,9 @@ const getTripByGuideIDCustomer = (req, res) => {
 
 
 const getTripByCustomerIDNew = (req, res) => {
-    let CustomerID = req.params.CustomerID;
+    let UserID = req.params.CustomerID;
     const UserQuery = 'SELECT * FROM Customer WHERE UserID = ?';
-    connection.query(UserQuery, [CustomerID], (err, rows) => {
+    connection.query(UserQuery, [UserID], (err, rows) => {
         if (err) {
             console.error('Error querying MySQL database:', err);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -190,16 +193,16 @@ const getTripByCustomerIDNew = (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Customer not found' });
         }
-        CustomerID = rows[0].CustomerID;
-        const query = 'SELECT * FROM Trip WHERE CustomerID = ? AND EndDate > CURDATE()';
+        let CustomerID = rows[0].CustomerID;
+        const query = 'SELECT * FROM Trip WHERE CustomerID = ? AND Status!= "End" AND Status!= "Close" ';
         connection.query(query, [CustomerID], (err, result) => {
             if (err) {
                 console.error('Error querying MySQL database:', err);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
             res.json(result);
-        });  
-    });  
+        });
+    });
 };
 const getTripByCustomerIDOLD = (req, res) => {
     let CustomerID = req.params.CustomerID;
@@ -213,35 +216,22 @@ const getTripByCustomerIDOLD = (req, res) => {
             return res.status(404).json({ error: 'Customer not found' });
         }
         CustomerID = rows[0].CustomerID;
-        const query = 'SELECT * FROM Trip WHERE CustomerID = ? AND EndDate < CURDATE()';
+        const query = 'SELECT * FROM Trip WHERE CustomerID = ? AND (Status = "End" OR Status = "Close")';
         connection.query(query, [CustomerID], (err, result) => {
             if (err) {
                 console.error('Error querying MySQL database:', err);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
             res.json(result);
-        });  
-    });  
-};
-
-const getOngoingTrips = (req, res) => {
-    // const query = 'SELECT * FROM Trip WHERE Status != "Completed"';
-    // connection.query(query, (err, rows) => {
-    //     if (err) {
-    //         console.error('Error querying MySQL database:', err);
-    //         return res.status(500).json({ error: 'Internal Server Error' });
-    //     }
-    //     console.log(rows);
-    //     res.status(200).json(rows);
-    // });
-    res.send("Responce from getOngoingTrips");
+        });
+    });
 };
 
 
 const onGoingTrips = (req, res) => {
-    const query = 'SELECT * FROM Trip WHERE Status != "Completed"';
-    connection.query(query, (err,rows) => {
-        if(err){
+    const query = 'SELECT * FROM Trip WHERE Status != "End" AND Status != "Close"';
+    connection.query(query, (err, rows) => {
+        if (err) {
             console.error('Error querying MySQL database:', err);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
@@ -250,7 +240,7 @@ const onGoingTrips = (req, res) => {
 }
 
 const getPreviousTrips = (req, res) => {
-    const query = 'SELECT * FROM Trip WHERE Status = "Completed"';
+    const query = 'SELECT * FROM Trip WHERE Status = "End" OR Status="Close"';
     connection.query(query, (err, rows) => {
         if (err) {
             console.error('Error querying MySQL database:', err);
@@ -272,6 +262,19 @@ const updateTripStatus = (req, res) => {
     });
 };
 
+const updateTripdistancepayment = (req, res) => {
+    const { TripID, Distance, Payment, Status } = req.body;
+    const query = 'UPDATE Trip SET TotalDistance = ?, GuidePayment = ?, Status = ? WHERE TripID = ?';
+    connection.query(query, [Distance, Payment, Status, TripID], (err, result) => {
+        if (err) {
+            console.error('Error updating MySQL database:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json({ message: 'Trip details updated successfully' });
+    });
+};
+
+
 module.exports = {
     addTrip,
     getAllTrips,
@@ -280,11 +283,11 @@ module.exports = {
     getTripByGuideID,
     getTripByCustomerIDNew,
     getTripByCustomerIDOLD,
-    getOngoingTrips,
     getPreviousTrips,
     updateTripStatus,
     getTripByGuideIDCustomer,
     onGoingTrips,
-    updateTripData
+    updateTripData,
+    updateTripdistancepayment
 
 }

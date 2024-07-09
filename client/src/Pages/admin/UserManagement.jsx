@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import instance from '../../api';
+import instance from '../../api'; // Import the Axios instance for API requests
 import AdminNavBar from '../../Components/admin/Navbar';
 import CountryDropdown from '../../Components/admin/CountryDropdown';
 import Swal from 'sweetalert2';
@@ -39,6 +39,7 @@ const UserManagement = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [itemsPerPage, setitemsPerPage] = useState(10);
 
+    // Fetch users based on filter role
     useEffect(() => {
         fetchUsers();
     }, [filterRole]);
@@ -54,9 +55,11 @@ const UserManagement = () => {
             setUsers(response.data.rows);
         } catch (error) {
             toast.error('Failed to fetch users');
+            console.log(error);
         }
     };
 
+     // Filter users based on search query and update pagination
     useEffect(() => {
         filterUsers();
     }, [searchQuery, users]);
@@ -71,6 +74,7 @@ const UserManagement = () => {
         setFilteredUsers(filtered);
     };
 
+    // Handle pagination
     const handlePageChange = (direction) => {
         if (direction === 'next' && currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
@@ -79,11 +83,13 @@ const UserManagement = () => {
         }
     };
 
+    // Handle search input change
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
         setCurrentPage(1); // Reset page to 1 when searching
     };
 
+    // Handle user deletion
     const handleDelete = async (UserId) => {
         const result = await Swal.fire({
             title: 'Are you sure?',
@@ -102,10 +108,12 @@ const UserManagement = () => {
                 fetchUsers();
             } catch (error) {
                 toast.error('Failed to delete user');
+                console.log(error);
             }
         }
     };
 
+    // Form validation
     const validateForm = (user) => {
         const errors = {};
 
@@ -166,9 +174,10 @@ const UserManagement = () => {
         }
 
         setErrors(errors);
-        return Object.keys(errors).length === 0;
+        return Object.keys(errors).length === 0; // Return true if there are no validation errors
     };
 
+     // Handle user registration or update
     const handleRegister = async () => {
         if (validateForm(newUser)) {
             try {
@@ -198,16 +207,20 @@ const UserManagement = () => {
                 } else {
                     toast.error('Failed to register/update user');
                 }
+                console.log(error);
             }
         }
     };
 
+    // Handle form input changes
     const handleChange = (e) => {
         let { name, value } = e.target;
 
+        // Convert VehicleNumber to uppercase
         if (name === 'VehicleNumber') {
             value = value.toUpperCase();
         }
+        // Validate input based on regex patterns
         const validations = {
             FirstName: /^[a-zA-Z]{1,15}$/,
             LastName: /^[a-zA-Z]{1,15}$/,
@@ -235,6 +248,7 @@ const UserManagement = () => {
         }
     };
 
+    // Handle edit user mode
     const handleEdit = (user) => {
         resetForm();
         setNewUser(user);
@@ -242,6 +256,7 @@ const UserManagement = () => {
         setShowModal(true);
     };
 
+    // Reset form fields and errors
     const resetForm = () => {
         setNewUser({
             FirstName: '',
@@ -264,10 +279,12 @@ const UserManagement = () => {
         setErrors({});
     };
 
+    // Handle filter role change
     const handleFilterChange = (e) => {
         setFilterRole(e.target.value);
     };
 
+    // Calculate current page users for pagination
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentusers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem)

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import instance from "../../api";
-import { useNavigate } from "react-router-dom";
+import instance from "../../api"; // Import the Axios instance for API requests
 import AdminNavBar from '../../Components/guide/Navbar';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -10,7 +9,6 @@ import Swal from 'sweetalert2';
 import { TextField } from '@mui/material';
 
 const GuideDashboard = () => {
-  const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [guide, setGuide] = useState({});
   const [Originalguidedata, setOriginalguidedata] = useState(null);
@@ -29,10 +27,12 @@ const GuideDashboard = () => {
   const [showVehicleModal, setShowVehicleModal] = useState(false);
   const [loading, setloading] = useState(true);
 
+  // Fetch guide data when the component mounts
   useEffect(() => {
     fetchGuideData();
   }, []);
 
+  // Fetch vehicle data and availability once guide data is fetched
   useEffect(() => {
     if (Object.keys(guide).length > 0) {
       getavailability();
@@ -40,6 +40,7 @@ const GuideDashboard = () => {
     }
   }, [guide]);
 
+  // Fetch current user and guide profile data
   const fetchGuideData = async () => {
     try {
       const response = await instance.get("/auth/current-user");
@@ -56,6 +57,7 @@ const GuideDashboard = () => {
     }
   };
 
+  // Fetch vehicle data for the guide
   const fetchVehicleData = async () => {
     try {
       const response = await instance.get(`/vehicle/${guide.VehicleID}`);
@@ -66,6 +68,7 @@ const GuideDashboard = () => {
     }
   };
 
+  // Fetch availability data for the guide
   const getavailability = async () => {
     try {
       const response = await instance.get(`/guideAvailability/getAvailability/${guide.GuideID}`);
@@ -80,6 +83,7 @@ const GuideDashboard = () => {
     }
   }
 
+  // Handle input changes for vehicle form with validation
   const handleInputChangevehicle = (e, setter) => {
     const { name, value } = e.target;
     let newValue = value;
@@ -117,8 +121,7 @@ const GuideDashboard = () => {
     }));
   };
 
-
-
+// Update guide profile data
   const updateGuideProfile = async () => {
     if (validateGuideProfile()) {
       const result = await Swal.fire({
@@ -152,6 +155,7 @@ const GuideDashboard = () => {
     }
   };
 
+  // Validate vehicle profile data
   const validateVehicleProfile = () => {
     const errors = {};
 
@@ -179,6 +183,7 @@ const GuideDashboard = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // Update vehicle profile data
   const updateVehicleProfile = async () => {
     if (validateVehicleProfile()) {
       const result = await Swal.fire({
@@ -213,6 +218,7 @@ const GuideDashboard = () => {
     }
   };
 
+  // Update guide availability data
   const updateAvailability = async () => {
     const newErrors = {};
 
@@ -247,7 +253,7 @@ const GuideDashboard = () => {
     }
   };
 
-
+// Handle availability modal close
   const handleavailabilityclose = () => {
     setAvailability({
       startDate: new Date(),
@@ -256,18 +262,21 @@ const GuideDashboard = () => {
     setShowAvailabilityModal(false)
   }
 
+  // Handle guide profile modal close
   const handleprofileclose = () => {
     setGuide(Originalguidedata);
     setErrors({});
     setShowGuideModal(false)
   }
 
+  // Handle vehicle profile modal close
   const handlevehicleclose = () => {
     setVehicle(OriginalvehicleData);
     setErrors({});
     setShowVehicleModal(false)
   }
 
+  // Set guide availability to "Not Available"
   const handlenotavailable = async () => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -299,6 +308,7 @@ const GuideDashboard = () => {
     }
   };
 
+  // Validate guide profile form data
   const validateGuideProfile = () => {
     const errors = {};
 
@@ -432,7 +442,7 @@ const GuideDashboard = () => {
             {/* Availability Modal */}
             {showAvailabilityModal && (
               <div className="modal modal-open w-full">
-                <div className="modal-box flex justify-center w-[30%] h-[65%]">
+                <div className="modal-box flex justify-center w-[20%] h-auto">
                   <div>
                     <h2 className="font-bold text-lg text-center my-8">Set Availability</h2>
                     <div>
